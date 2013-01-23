@@ -190,7 +190,6 @@ The End
 */
 
 #include <stdint.h>
-#include <Rcpp.h>
 
 #ifdef OSX
 	#define __inline__ inline
@@ -222,22 +221,22 @@ The End
 	// this test was suggested by Steve Wiley to correct a problem
 	// associated with compiling using the 64-bit version of Redhat Linux
 
-// rTANDEM - 2 next lines
+// rTANDEM This was all replaced by #include <stdint.h>
 // #ifndef __APPLE__ 
 // #if defined(__x86_64__) && defined(__linux__) 
-#ifndef uint32_t
-  #define uint32_t unsigned int
-#endif
-#ifndef uint64_t
-  #define uint64_t unsigned long long
-#endif
+//#ifndef uint32_t
+//  #define uint32_t unsigned int
+//#endif
+//#ifndef uint64_t
+//  #define uint64_t unsigned long long
+//#endif
 
 // #endif 
 #if defined(WIN32) || defined(_WIN32)
 	#define __inline__ inline
 	#define __int64_t long long
-	#define uint32_t unsigned long
-	#define uint64_t unsigned long long
+  //	#define uint32_t unsigned long
+  //    #define uint64_t unsigned long long
 #endif
 // #endif
 // rTANDEM - 2 last lines
