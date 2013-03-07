@@ -1,8 +1,8 @@
 Package: rTANDEM
 Type: Package
 Title: Encapsulate X!Tandem in R.
-Version: 0.99.4
-Date: 2013-01-23
+Version: 0.99.5
+Date: 2013-03-07
 SystemRequirements: rTANDEM uses expat and pthread libraries. See the
         README file for details.
 Author@R: c(person("Frederic", "Fournier",
@@ -17,6 +17,6 @@ Description: This package encapsulate X!Tandem in R. In its most basic functiona
 biocViews: MassSpectrometry, Proteomics
 License: Artistic-1.0 | file LICENSE
 Imports: methods
-Depends: XML, Rcpp, data.table (>= 1.8.6)
+Depends: XML, Rcpp, data.table (>= 1.8.8)
 Suggests: biomaRt
 LinkingTo: Rcpp
