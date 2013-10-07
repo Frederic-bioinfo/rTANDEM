@@ -1,8 +1,8 @@
 Package: rTANDEM
 Type: Package
-Title: Encapsulate X!Tandem in R.
-Version: 1.1.4
-Date: 2013-09-23
+Title: Encapsulates X!Tandem in R.
+Version: 1.1.6
+Date: 2013-10-07
 SystemRequirements: rTANDEM uses expat and pthread libraries. See the
         README file for details.
 Author@R: c(person("Frederic", "Fournier",
@@ -13,7 +13,7 @@ Author@R: c(person("Frederic", "Fournier",
         email="arnaud.droit@crchuq.ulaval.ca"))
 Author: Frederic Fournier <frederic.fournier@crchuq.ulaval.ca>, Charles Joly Beauparlant <charles.joly-beauparlant@crchul.ulaval.ca>, Rene Paradis <rene.paradis@genome.ulaval.ca>, Arnaud Droit <arnaud.droit@crchuq.ulaval.ca>
 Maintainer: Frederic Fournier <frederic.fournier@crchuq.ulaval.ca>
-Description: This package encapsulate X!Tandem in R. In its most basic functionality, this package allows to call tandem(input) from R, just as tandem.exe /path/to/input.xml would be used to run X!Tandem from the command line. Classes are also provided for taxonomy and parameters objects and methods are provided to convert xml files to R objects and vice versa. This package is the first step in an attempt to provide a reliable worflow for proteomics analysis in R.
+Description: This package encapsulate X!Tandem in R. In its most basic functionality, this package allows to call tandem(input) from R, just as tandem.exe /path/to/input.xml would be used to run X!Tandem from the command line. Classes are also provided for taxonomy and parameters objects and methods are provided to convert xml files to R objects and vice versa. 
 biocViews: MassSpectrometry, Proteomics
 License: Artistic-1.0 | file LICENSE
 Imports: methods

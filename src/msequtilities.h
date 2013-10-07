@@ -200,6 +200,7 @@ public:
 	bool modify_annotation(string &_s);
 	bool modify_motif(const string &_s);
 	bool motif_set(const msequence &_s);
+	string m_strDefaultMaybe;
 
 	double mztomh(double mz, float z)
 	{
@@ -245,6 +246,5 @@ private:
 	bool set_b(const char _c,const float _f);
 	bool set_x(const char _c,const float _f);
 	bool set_y(const char _c,const float _f);
-	string m_strDefaultMaybe;
 };
 #endif

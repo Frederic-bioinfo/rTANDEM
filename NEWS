@@ -1,0 +1,29 @@
+CHANGES IN VERSION 1.1.6
+------------------------
+
+NEW FEATURES
+
+    o rTANDEM is now based on x!tandem version 13-09-01 'sledgehammer'
+
+CHANGES IN VERSION 1.1.5
+------------------------
+
+BUG FIXES
+
+    o Fixed a memory management problen in Cpp
+
+NEW FEATURES
+
+    o More parameters are supported. 
+
+CHANGES IN VERSION 1.1.4
+------------------------
+
+NEW FEATURES
+
+    o rTANDEM is now based on x!tandem version 13-06-15 'jackhammer'
+
+BUG FIXES
+
+    o Corrected a bug that prevented the use of multi-threading
+    o Corrected a bug that could affect results when multiple fasta files are assigned to a same taxon.

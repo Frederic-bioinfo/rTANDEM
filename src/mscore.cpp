@@ -187,7 +187,7 @@ mscore::mscore(void) :
 	m_dParentErrMinus = 2.0;
 	m_dErr = (float)0.45;
 	
-	m_fWidth = 1.0;
+	m_dWidth = 1.0;
 	m_lMaxCharge = 100;
 	m_dSeqMH = -1.0;
 	m_lSize = 256;
@@ -314,7 +314,7 @@ bool mscore::add_A(const unsigned long _t,const long _c)
  * look up appropriate scores from m_pSeqUtilFrag->m_pfAScore
  */
 	const unsigned long tPos = (unsigned long) m_tSeqPos;
-	m_dWE = m_fWidth/m_dErr;
+	m_dWE = m_dWidth/m_dErr;
 	const double dZ = (double)_c;
 	while(a < m_lSeqLength)	{
 		tC = m_pSeq[a];
@@ -386,7 +386,7 @@ bool mscore::add_B(const unsigned long _t,const long _c)
  */
 	const unsigned long tPos = (unsigned long) m_tSeqPos;
 	size_t tC = 0;
-	m_dWE = m_fWidth/m_dErr;
+	m_dWE = m_dWidth/m_dErr;
 	const double dZ = (double)_c;
 	while(a < m_lSeqLength-1)	{
 		tC = m_pSeq[a];
@@ -463,7 +463,7 @@ bool mscore::add_C(const unsigned long _t,const long _c)
  * from N- to C-terminus, calcuate fragment ion m/z values and store the results
  * look up appropriate scores from m_pSeqUtilFrag->m_pfBScore
  */
-	m_dWE = m_fWidth/m_dErr;
+	m_dWE = m_dWidth/m_dErr;
 	double dZ = (double)_c;
 	const unsigned long tPos = (unsigned long) m_tSeqPos;
 	while(a < m_lSeqLength-2)	{
@@ -532,7 +532,7 @@ bool mscore::add_X(const unsigned long _t,const long _c)
  * from C- to N-terminus, calcuate fragment ion m/z values and store the results
  * look up appropriate scores from m_pSeqUtilFrag->m_pfAScore
  */
-	m_dWE = m_fWidth/m_dErr;
+	m_dWE = m_dWidth/m_dErr;
 	double dZ = (double)_c;
 	const unsigned long tPos = (unsigned long) m_tSeqPos;
 	while(a > 0)	{
@@ -601,7 +601,7 @@ bool mscore::add_Y(const unsigned long _t,const long _c)
  */
 	long tPos = (unsigned long) m_tSeqPos;
 	size_t tC = 0;
-	m_dWE = m_fWidth/m_dErr;
+	m_dWE = m_dWidth/m_dErr;
 	double dZ = (double)_c;
 	bool bZero = false;
 	if(_t == 0)	{
@@ -692,7 +692,7 @@ bool mscore::add_Z(const unsigned long _t,const long _c)
  * from C- to N-terminus, calcuate fragment ion m/z values and store the results
  * look up appropriate scores from m_pSeqUtilFrag->m_pfAScore
  */
-	m_dWE = m_fWidth/m_dErr;
+	m_dWE = m_dWidth/m_dErr;
 	double dZ = (double)_c;
 	const unsigned long tPos = (unsigned long) m_tSeqPos;
 	while(a > 0)	{
@@ -1125,7 +1125,7 @@ __inline__ unsigned long mscore::mconvert(double _m, const long _c)
  * as referenced in m_vsmapMI
  */
 	const double dZ = (double)_c;
-	return (unsigned long)((m_pSeqUtilFrag->m_dProton + _m/dZ)*m_fWidth/m_dErr);
+	return (unsigned long)((m_pSeqUtilFrag->m_dProton + _m/dZ)*m_dWidth/m_dErr);
 }
 #ifndef PLUGGABLE_SCORING
 
@@ -1794,7 +1794,7 @@ float mscore::score(const size_t _i)
 		}
 		double dNeutral = 0.0;
 		unsigned long lNeutral = 0;
-		m_dWE = (double)(m_fWidth/m_dErr);
+		m_dWE = (double)(m_dWidth/m_dErr);
 		if((pS && m_pSeqUtilFrag->m_bPhosphoSerine) || (pT && m_pSeqUtilFrag->m_bPhosphoThreonine))	{
 			nMap::iterator itMap = m_seqUtil.m_mapNeutralLoss.find(m_lId);
 			if(itMap != m_seqUtil.m_mapNeutralLoss.end())	{
@@ -2001,10 +2001,10 @@ unsigned long mscore::set_error(const unsigned long _t)
  * in Daltons, or relative, in parts-per-million. the allowed values are constructed
  * from the values in the enum mscore_error.
  */
-float mscore::set_homo_error(const float _f)
+double mscore::set_homo_error(const double _f)
 {
 	m_dHomoError = _f;
-	return (float)m_dHomoError;
+	return m_dHomoError;
 }
 /*
  * sets the value for the fragment error member value m_fErr. this value is interpreted in two ways:
@@ -2015,7 +2015,7 @@ float mscore::set_homo_error(const float _f)
  *         this value is used in the blur() method and the width of the
  *         blurred distribution is scaled from the value at m/z = 200.0
  */
-float mscore::set_fragment_error(const float _f)
+double mscore::set_fragment_error(const double _f)
 {
 	if(_f <= 0.0)
 		return 0.0;
@@ -2026,12 +2026,12 @@ float mscore::set_fragment_error(const float _f)
 /*
  * NOTE: the m_fErr value used in the ppm case is: 200 x (the error in ppm)/1000000
  */
-	return (float)m_dErr;
+	return m_dErr;
 }
 /*
  * sets the value for the parent error member values m_dParentErrPlus and m_dParentErrMinus.
  */
-float mscore::set_parent_error(const float _f,const bool _b)
+double mscore::set_parent_error(const double _f,const bool _b)
 {
 	if(_b)	{
 		if(_f < 0.0)

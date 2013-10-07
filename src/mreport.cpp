@@ -643,6 +643,7 @@ bool mreport::masses(msequtilities &_p)
 	if(!_p.is_modified())	{
 		return false;
 	}
+	size_t a = 0;
 	char cAa = 'A';
 /*
  * create the group object
@@ -651,8 +652,7 @@ bool mreport::masses(msequtilities &_p)
 	char *pLine = new char[256];
 	m_ofOut << "<group label=\"residue mass parameters\" type=\"parameters\">\n";
 	while(cAa <= 'Z')	{
-		int index = cAa;
-		sprintf(pLine,"\t<aa type=\"%c\" mass=\"%.6lf\" />\n",cAa,_p.m_pdAaMass[index]);
+		sprintf(pLine,"\t<aa type=\"%c\" mass=\"%.6lf\" />\n",cAa,_p.m_pdAaMass[cAa]);
 		m_ofOut << pLine;
 		cAa++;
 	}

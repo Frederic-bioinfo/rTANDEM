@@ -284,11 +284,6 @@ SEXP tandem(SEXP param, SEXP peptide, SEXP saps, SEXP mods, SEXP spectrum) // rT
 		while(dCount > 0)		{
 			pProcess[dCount] = new mprocess;
 			pProcess[dCount]->set_thread(dCount);						 
-			/*
-
-			* initialize the new mprocess objects with	the	spectra	already	loaded into	the	first mprocess
-
-			*/
 			pProcess[dCount]->m_vSpectra.reserve(lSpectra);
 			pProcess[dCount]->m_fMaxMass = fMax;
 			pProcess[dCount]->m_fMaxZ = fZ;
@@ -335,6 +330,77 @@ SEXP tandem(SEXP param, SEXP peptide, SEXP saps, SEXP mods, SEXP spectrum) // rT
 			//cout.flush();
 		}
 	}
+/*	if(lThread != 0xFFFFFFFF)		{
+		while(dCount > 0)		{
+			pProcess[dCount] = new mprocess;
+			pProcess[dCount]->set_thread(dCount);						 
+
+//			 initialize the new mprocess objects with	the	spectra	already	loaded into	the	first mprocess
+
+			pProcess[dCount]->m_vSpectra.reserve(lSpectra);
+			pProcess[dCount]->m_fMaxMass = fMax;
+			pProcess[dCount]->m_fMaxZ = fZ;
+			dCount--;
+		}
+
+		size_t tProcesses = lThreads;
+		size_t tTotal = pProcess[0]->m_vSpectra.size();
+		size_t tMaxSlice = tTotal/(2*lThreads);
+		if(tMaxSlice == 0)	{
+			tMaxSlice = 1;
+		}
+		size_t tRing = 0;
+		double dSliceMH = pProcess[0]->m_vSpectra.back().m_dMH;
+		double dSliceWidth = 0.20;
+		size_t tSlice = 0;
+		vector<mspectrum> vZero;
+		vZero.reserve(lSpectra);
+		size_t tI = 0;
+		do	{
+			dSliceMH = pProcess[0]->m_vSpectra.back().m_dMH;
+			tSlice = 0;
+			while(!pProcess[0]->m_vSpectra.empty() && tSlice < tMaxSlice && dSliceMH - pProcess[0]->m_vSpectra.back().m_dMH < dSliceWidth)	{
+				if(tRing == 0)	{
+					vZero.push_back(pProcess[0]->m_vSpectra.back());
+				}
+				else	{
+					pProcess[tRing]->m_vSpectra.push_back(pProcess[0]->m_vSpectra.back());
+				}
+				pProcess[0]->m_vSpectra.pop_back();
+				tSlice++;
+				tI++;
+			}
+			tRing++;
+			if(tRing == tProcesses)	{
+				tRing = 0;
+
+			}
+		}	while(!pProcess[0]->m_vSpectra.empty() != 0);
+		pProcess[0]->m_vSpectra.reserve(vZero.size());
+		do	{
+			pProcess[0]->m_vSpectra.push_back(vZero.back());
+			vZero.pop_back();
+		}	while(!vZero.empty());
+		dCount = lThreads - 1;
+		tSlice = 0;
+		while(dCount > 0)		{
+			if(!pProcess[dCount]->load(pS,pProcess[0]))	{
+				cout <<	"error pProcess->LoadParameters	returned error (main)\r\n";
+				delete pProcess;
+				return -4;
+			}
+			cout <<	pProcess[dCount]->m_vSpectra.size();
+			tSlice += pProcess[dCount]->m_vSpectra.size();
+			cout.flush();
+			dCount--;
+		}
+		cout <<	"|" << pProcess[dCount]->m_vSpectra.size();
+		cout.flush();
+		tSlice += pProcess[dCount]->m_vSpectra.size();
+		if((int)tSlice - (int)tTotal != 0)	{
+			cout <<	"|" << (int)tSlice - (int)tTotal;
+		}
+	}*/
 	delete pS;
 	dCount = 0;
 #ifdef MSVC

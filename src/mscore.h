@@ -399,9 +399,9 @@ public:
 	bool set_pam(const bool _b);
 	bool set_saps(const bool _b,string &_s);
 	bool set_allowed_saps(string &_s);
-	float set_parent_error(const float _f,const bool _b);
-	float set_homo_error(const float _f);
-	float set_fragment_error(const float _f);
+	double set_parent_error(const double _f,const bool _b);
+	double set_homo_error(const double _f);
+	double set_fragment_error(const double _f);
 	void set_fragment_masstype(masscalc::massType _t);
 	bool test_parents(size_t &_t);
 	bool set_pos(const size_t _t);
@@ -450,7 +450,7 @@ protected:
 	unsigned long m_lErrorType; // current ion mass accuracy information - value from mscore_error
 	float m_fScore; // current convolution score
 	double m_dSeqMH; // current sequence M+H - changed from m_fSeqMH to improve accuracy of parent ion mass calculations
-	float m_fWidth; // current half-width of the entry for a single fragment ion in the m_vsmapMI map
+	double m_dWidth; // current half-width of the entry for a single fragment ion in the m_vsmapMI map
 	                // this value is used by blur
 	float *m_pfSeq; // residue masses corresponding to the current sequence in daltons
 	unsigned long *m_plAA;

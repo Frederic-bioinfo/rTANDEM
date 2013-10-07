@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2003-2004 Ronald C Beavis, all rights reserved
+ Copyright (C) 2003-2013 Ronald C Beavis, all rights reserved
  X! tandem 
  This software is a component of the X! proteomics software
  development project
@@ -437,6 +437,10 @@ bool mprocess::create_score(const msequence &_s,const size_t _v,const size_t _w,
 	long lCount = 0;
 	bool bIonCheck = false;
 	bool bMassCheck = false;
+	bool bC = false;
+//	if(_s.m_strDes == "ENSRNOP00000027073" && _v == 11 && _w == 26)	{
+//		bC = true;
+//	}
 /*
  * score each mspectrum identified as a candidate in the m_pScore->m_State object
  */
@@ -494,11 +498,7 @@ bool mprocess::create_score(const msequence &_s,const size_t _v,const size_t _w,
 * one can cause others to score differently from how they would score
 * alone.
 */
-		if (m_vSpectra[a].m_hHyper.m_ulCount < 400 && m_iCurrentRound == 1)     {
-			if(m_iCurrentRound > 1)	{
-				Rprintf("%s\n", m_vSpectra[a].m_tId);
-//				cout << m_vSpectra[a].m_tId << "\n";
-			}
+		if (m_vSpectra[a].m_hHyper.m_ulCount < 400 && m_iCurrentRound < 3)     {
 			if(m_bCrcCheck && _p)   {
 				m_bPermute = true;
 			}
@@ -1573,59 +1573,59 @@ bool mprocess::process(void)
 		strKey = "spectrum, fragment monoisotopic mass error";
 		m_xmlValues.get(strKey,strValue);
 	}
-	float fErrorValue = (float)atof(strValue.c_str());
-	if(fErrorValue <= 0.0)
-		fErrorValue = (float)0.45;
-	m_pScore->set_fragment_error(fErrorValue);
+	double dErrorValue = atof(strValue.c_str());
+	if(dErrorValue <= 0.0)
+		dErrorValue = (float)0.45;
+	m_pScore->set_fragment_error(dErrorValue);
 	strKey = "spectrum, parent monoisotopic mass error plus";
 	m_xmlValues.get(strKey,strValue);
-	fErrorValue = (float)atof(strValue.c_str());
-	fErrorValue = (float)fabs(atof(strValue.c_str()));
-	m_errValues.m_fPlus = fErrorValue;
+	dErrorValue = atof(strValue.c_str());
+	dErrorValue = fabs(atof(strValue.c_str()));
+	m_errValues.m_dPlus = dErrorValue;
 	if(m_errValues.m_bPpm)	{
-		if(fErrorValue < 95.0)	{
+		if(dErrorValue < 95.0)	{
 			m_bCrcCheck = true;
 		}
-		if(fErrorValue < 10.0)	{
-			fErrorValue = 10.0;
+		if(dErrorValue < 20.0)	{
+			dErrorValue = 20.0;
 		}
 	}
 	else	{
-		if(fErrorValue < 0.095)	{
+		if(dErrorValue < 0.095)	{
 			m_bCrcCheck = true;
 		}
-		if(fErrorValue < 0.01)	{
-			fErrorValue = (float)0.01;
+		if(dErrorValue < 0.01)	{
+			dErrorValue = (float)0.01;
 		}
 	}
-	m_pScore->set_parent_error(fErrorValue,true);
+	m_pScore->set_parent_error(dErrorValue,true);
 	strKey = "spectrum, homology error";
 	m_xmlValues.get(strKey,strValue);
-	fErrorValue = (float)atof(strValue.c_str());
-	if(fErrorValue <= 0.0)
-		fErrorValue = (float)4.5;
-	m_pScore->set_homo_error(fErrorValue);
+	dErrorValue = atof(strValue.c_str());
+	if(dErrorValue <= 0.0)
+		dErrorValue = 4.5;
+	m_pScore->set_homo_error(dErrorValue);
 	strKey = "spectrum, parent monoisotopic mass error minus";
 	m_xmlValues.get(strKey,strValue);
-	fErrorValue = (float)fabs(atof(strValue.c_str()));
-	m_errValues.m_fMinus = (float)(-1.0*fErrorValue);
+	dErrorValue = fabs(atof(strValue.c_str()));
+	m_errValues.m_dMinus = -1.0*dErrorValue;
 	if(m_errValues.m_bPpm)	{
-		if(fErrorValue < 95.0)	{
+		if(dErrorValue < 95.0)	{
 			m_bCrcCheck = true;
 		}
-		if(fErrorValue < 10.0)	{
-			fErrorValue = 10.0;
+		if(dErrorValue < 20.0)	{
+			dErrorValue = 20.0;
 		}
 	}
 	else	{
-		if(fErrorValue < 0.095)	{
+		if(dErrorValue < 0.095)	{
 			m_bCrcCheck = true;
 		}
-		if(fErrorValue < 0.01)	{
-			fErrorValue = (float)0.01;
+		if(dErrorValue < 0.01)	{
+			dErrorValue = 0.01;
 		}
 	}
-	m_pScore->set_parent_error(fErrorValue,false);
+	m_pScore->set_parent_error(dErrorValue,false);
 	strKey = "spectrum, parent monoisotopic mass isotope error";
 	m_xmlValues.get(strKey,strValue);
 	if(strValue == "yes")	{
@@ -1950,7 +1950,15 @@ bool mprocess::report(void)
 	m_pScore->clear();
 	sort(m_vSpectra.begin(),m_vSpectra.end(),lessThanSpectrumId);
 	while(itS != m_vSpectra.end())	{
-		itS->m_hHyper.model();
+//		if(itS->m_tId == 8313)	{
+//			itS->m_hHyper.dump();
+//			itS->m_hHyper.model_dump();
+//			itS->m_hHyper.dump();
+//		}
+//		else
+//		{
+			itS->m_hHyper.model();
+//		}
 		itS->m_hHyper.set_protein_factor(1.0);
 		sort(itS->m_vseqBest.begin(),itS->m_vseqBest.end(),lessThanSequenceUid);
 		itS++;
@@ -1968,6 +1976,9 @@ bool mprocess::report(void)
 		mapSpec.insert(prSpec);
 		if(!m_vSpectra[a].m_vseqBest.empty() && !m_vSpectra[a].m_vseqBest[0].m_vDomains.empty())	{
 			m_vSpectra[a].m_dExpect = m_vSpectra[a].m_hHyper.expect(m_pScore->hconvert(m_vSpectra[a].m_vseqBest[0].m_vDomains[0].m_fHyper));
+//			if(m_vSpectra[a].m_tId == 8313)	{
+//				cout << "<hr />" << m_pScore->hconvert(m_vSpectra[a].m_vseqBest[0].m_vDomains[0].m_fHyper) << ":" << m_vSpectra[a].m_hHyper.m_ulCount << ":" << m_vSpectra[a].m_dExpect << "<br />";
+//			}
 		}
 		a++;
 	}
@@ -3166,6 +3177,10 @@ bool mprocess::score_terminus(const string &_s)
 bool mprocess::score_single(const msequence &_s)
 {
 	m_pScore->m_seqUtil.motif_set(_s);
+//	if(_s.m_strDes == "ENSRNOP00000027073")	{
+//		cout << "<br />" << _s.m_strDes << "<br />";
+//		cout.flush();
+//	}
 	if((m_bAnnotation || m_bMinimalAnnotation) && !m_mapAnnotation.empty())	{
 		map <string,string>::iterator itMod;
 		if(_s.m_strDes.find("IPI") != _s.m_strDes.npos)	{

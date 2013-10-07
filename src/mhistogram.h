@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2003 Ronald C Beavis, all rights reserved
+ Copyright (C) 2003-2013 Ronald C Beavis, all rights reserved
  X! tandem 
  This software is a component of the X! proteomics software
  development project
@@ -131,6 +131,7 @@ The End
 #ifndef MHISTOGRAM_H
 #define MHISTOGRAM_H
 
+#include <Rcpp.h>    // rTANDEM
 #include <string.h>  // rTANDEM
 // File version: 2003-07-01
 
@@ -146,6 +147,7 @@ The End
  * to a log-log linear distribution using least-squares in the model method.
  * mhistogram is included in the mspectrum.h file only
  */
+#include <climits>
 
 class mhistogram	{
 public:
@@ -157,9 +159,10 @@ public:
 		init();
 		(*this) = rhs;
 	}
-	unsigned short* m_pList; // doubling buffer
-	long m_lLength; // the length of the histogram
-	unsigned long m_ulCount;
+	int* m_pList; // doubling buffer
+	int m_lLength; // the length of the histogram
+	int m_ulCount;
+	int m_ulMax;
 	void init() {
 		m_ulCount = 0;
 		m_lLength = 0;
@@ -169,6 +172,8 @@ public:
 		m_dProteinFactor = 1.0;
 		m_lSum = 0;
 		m_dLimit = 1.0e-15;
+		m_lHigh = 0;
+		m_ulMax = INT_MAX;
 	}
 
 	virtual ~mhistogram(void) {
@@ -179,12 +184,26 @@ protected:
 	float m_fA0; // the intercept of the least-squares fit performed in model
 	float m_fA1; // the slope of the least-squares fit performed in model
 private:
-	vector<long> m_vlSurvive; // the survival function array, reduced to [96] from [256]
-	long m_lSum;
+	vector<int> m_vlSurvive; // the survival function array, reduced to [96] from [256]
+	int m_lSum;
 	double m_dLimit;
+	int m_lHigh;
 
 public:
 
+	bool dump(void)
+	{
+		int a = 0;
+		while(a < m_lLength)	{
+//			cout << m_pList[a] << ",";
+  		        Rprintf("%ul,",m_pList[a]);
+			a++;
+		}\
+//		cout << "<br />" << m_ulCount << "<br />";
+		Rprintf("<br />%ul<br />", m_ulCount);
+//		cout.flush();
+		return true;
+	}
 /*
  * expect uses the equation derived in model to convert scores into expectation values
  * survival and model must be called before expect will return reasonable values
@@ -199,24 +218,24 @@ public:
 /*
  * list returns a specified value from the stochastic distribution of the histogram
  */
-	long list(const unsigned long _l)	{
-		if (_l >= (unsigned long) m_lLength)
+	int list(const int _l)	{
+		if (_l >= m_lLength)
 			return 0;
 		return m_pList[_l];
 	}
 /*
  * survive returns a specified value from the stochastic distribution of the survival function
  */
-	long survive(const unsigned long _l)	{
+	int survive(const int _l)	{
 		return m_vlSurvive[_l];
 	}
-	long sum()	{
+	int sum()	{
 		return m_lSum;
 	}
 /*
  * length returns the maximum length of the histogram
  */
-	long length(void)	{
+	int length(void)	{
 		return m_lLength;
 	}
 /*
@@ -254,42 +273,62 @@ public:
  * reset zeros the histogram array m_pList
  */
 	virtual bool clear()	{
-		long a = 0;
+		int a = 0;
 		while(a < m_lLength)	{
 			m_pList[a] = 0;
 			a++;
 		}
 		m_ulCount = 0;
+		m_lHigh = 0;
 		return true;
 	}
 
 /*
  * add increments the appropriate value in m_pList for a score value
  */
-	virtual long add(const float _f)	{
-		long lValue = (long)(_f + 0.5);
+	virtual int add(const float _f)	{
+		int lValue = (int)(_f + 0.5);
 		// If buffer too small, double its size.
 		// Buffer must have empty bucket at end to output
 		// histogram correctly for reports.
 		if(lValue > m_lLength - 2)	{
-			long lLengthNew = lValue + 2;
+			int lLengthNew = lValue + 2;
 
-			unsigned short* pListNew = new unsigned short[lLengthNew];
-			memset(pListNew, 0, lLengthNew * sizeof(unsigned short));
+			int* pListNew = new int[lLengthNew];
+			memset(pListNew, 0, lLengthNew * sizeof(int));
 
 			if (m_pList != NULL) {
-				memcpy(pListNew, m_pList, m_lLength * sizeof(unsigned short));
+				memcpy(pListNew, m_pList, m_lLength * sizeof(int));
 				delete [] m_pList;
 			}
 
 			m_pList = pListNew;
 			m_lLength = lLengthNew;
+			if(m_pList[lValue] < INT_MAX)	{
+				m_pList[lValue]++;
+			}
+			m_lHigh = lValue;
+			return lValue;
 		}
-		
-		if(m_pList[lValue] < 0xFFFE)	{
-			m_pList[lValue]++;
+		if(m_ulCount > m_ulMax)	{
+			if(lValue >= m_lHigh)	{
+				if(m_pList[lValue] < INT_MAX)	{
+					m_pList[lValue]++;
+				}
+				m_lHigh = lValue;
+			}
 		}
-		m_ulCount++;
+		else {
+			if(m_pList[lValue] < INT_MAX)	{
+				m_pList[lValue]++;
+			}
+			if(lValue > m_lHigh)	{
+				m_lHigh = lValue;
+			}
+			if(lValue < m_lHigh)	{
+				m_ulCount++;
+			}
+		}
 		return lValue;
 	}
 /*
@@ -300,63 +339,56 @@ public:
 		if (m_lLength == 0)
 			return false;
 
-		long a = m_lLength - 1;
-		long lSum = 0;
-		long *plValues = new long[m_lLength];
+		int a = 0;
+		int lSum = 0;
+		int *plValues = new int[m_lLength];
 /*
  * first calculate the raw survival function
  */
+		int *pTempList =  new int[m_lLength];
+		int lZeros = 0;
+		while(a < m_lLength)	{
+			if(a < 6)	{
+				pTempList[a] = m_pList[a];
+			}
+			else
+			{
+				if(m_pList[a] == 0)	{
+					lZeros++;
+				}
+				if(lZeros == 1 && m_pList[a-1] > 1)	{
+					pTempList[a-1] = 1;
+				}
+				if(lZeros > 0 && lZeros <= 1 && m_pList[a] > 1)	{
+					pTempList[a] = 1;
+				}
+				else if(lZeros > 1)	{
+					pTempList[a] = 0;
+				}
+				else {
+					pTempList[a] = m_pList[a];
+				}
+			}
+			a++;
+		}
+		a = m_lLength - 1;
 		while(a > -1)	{
-			lSum += m_pList[a];
+			lSum += pTempList[a];
 			plValues[a] = lSum;
 			a--;
 		}
 		a = 0;
 /*
- * determine the value of the survival function that is 1/5 of the maximum
- */
-		const long lPos = plValues[0]/5;
-		while(a < m_lLength && plValues[a] > lPos)	{
-			a++;
-		}
-		const long lMid = a;
-		a = m_lLength - 1;
-		while(a > -1 && plValues[a] == 0)	{
-			a--;
-		}
-		lSum = 0;
-		long lValue = 0;
-/*
- * remove potentially valid scores from the stochastic distribution
- */
-		while(a > 0)	{
-			if(plValues[a] == plValues[a-1] 
-					&& plValues[a] != plValues[0]
-					&& a > lMid)	{
-				lSum = plValues[a];
-				lValue = plValues[a];
-				a--;
-				while(plValues[a] == lValue)	{
-					plValues[a] -= lSum;
-					a--;
-				}
-			}
-			else	{
-				plValues[a] -= lSum;
-				a--;
-			}
-		}
-		plValues[a] -= lSum;
-		a = 0;
-/*
  * replace the scoring distribution with the survival function
  */
 		m_vlSurvive.clear();
+		plValues[m_lHigh] = 1;
 		while(a < m_lLength)	{
 			m_vlSurvive.push_back(plValues[a]);
 			a++;
 		}
 		delete plValues;
+		delete pTempList;
 		m_lSum = m_vlSurvive[0];
 		return true;
 	}
@@ -374,18 +406,18 @@ public:
 	{
 		survival();
 		m_fA0 = (float)3.5;
-		m_fA1 = (float)-0.18;
+		m_fA1 = (float)-0.25;
 /*
  * use default values if the statistics in the survival function is too meager
  */
-		if(m_lLength == 0 || m_vlSurvive[0] < 200)	{
+		if(m_lLength == 0)	{
 			return false;
 		}
 		float *pfX = new float[m_lLength];
 		float *pfT = new float[m_lLength];
-		long a = 1;
-		long lMaxLimit = (long)(0.5 + m_vlSurvive[0]/2.0);
-		const long lMinLimit = 10;
+		int a = 1;
+		const int lMaxLimit = (int)(0.5 + m_vlSurvive[0]*0.6);
+		const int lMinLimit = 1;
 /*
  * find non zero points to use for the fit
  */
@@ -393,7 +425,7 @@ public:
 		while(a < m_lLength && m_vlSurvive[a] > lMaxLimit)	{
 			a++;
 		}
-		long b = 0;
+		int b = 0;
 		while(a < m_lLength-1 && m_vlSurvive[a] > lMinLimit)	{
 			pfX[b] = (float)a;
 			pfT[b] = (float)log10((double)m_vlSurvive[a]);
@@ -407,9 +439,13 @@ public:
 		double dSumT = 0.0;
 		double dSumXX = 0.0;
 		double dSumXT = 0.0;
-		long iMaxValue = 0;
+		int iMaxValue = 0;
 		double dMaxT = 0.0;
-		long iValues = b;
+		double dZero = (double)(a - 1);
+		int lZeros = m_lHigh - a - 1;
+		double dDefaultA1 = -0.25;
+		double dDefaultA0 = -1.0*((dZero+2.5)*dDefaultA1);
+		int iValues = b-1;
 		a = 0;
 		while(a < iValues)	{
 			if(pfT[a] > dMaxT)	{
@@ -435,7 +471,18 @@ public:
 		}
 		m_fA0 = (float)((dSumXX*dSumT -dSumX*dSumXT)/dDelta);
 		m_fA1 = (float)(((double)iValues*dSumXT - dSumX*dSumT)/dDelta);
-		delete pfX;
+		m_fA0 = (float)(-1.0*((dZero+2.5)*m_fA1));
+		double dScore = m_fA0 + m_fA1*(double)m_lHigh;
+		if(dScore > 0.0)	{
+			dScore = 0.0;
+		}
+		if(dScore > 2.5 + dDefaultA0 + dDefaultA1*(double)m_lHigh || m_vlSurvive[0] < 200)	{
+//			cout << "<hr />" << lZeros << ", " << m_fA0 << ":" << m_fA1<< ", " << dDefaultA0 << ":" << dDefaultA1  << " | ";
+			m_fA0 = (float)dDefaultA0;
+			m_fA1 = (float)dDefaultA1;
+//			cout << dScore << ":" << m_fA0 + m_fA1*(double)m_lHigh << "<br />";
+		}
+		delete pfX; 
 		delete pfT;
 		m_vlSurvive.clear();
 		return true;
@@ -446,12 +493,13 @@ public:
 	mhistogram& operator=(const mhistogram &rhs)	{
 		m_ulCount = rhs.m_ulCount;
 		m_lLength = rhs.m_lLength;
+		m_lHigh = rhs.m_lHigh;
 		delete [] m_pList;
 		if (rhs.m_pList == NULL)
 			m_pList = NULL;
 		else {
-			size_t size = m_lLength * sizeof(unsigned short);
-			m_pList = new unsigned short[size];
+			size_t size = m_lLength * sizeof(int);
+			m_pList = new int[size];
 			memcpy(m_pList, rhs.m_pList, size);
 		}
 		m_fA0 = rhs.m_fA0;
@@ -463,12 +511,15 @@ public:
 	mhistogram& operator+=(const mhistogram &rhs)	{
 		m_ulCount += rhs.m_ulCount;
 		m_lLength = rhs.m_lLength;
-		long a = 0;
+		int a = 0;
 		m_fA0 = rhs.m_fA0;
 		m_fA1 = rhs.m_fA1;
 		m_dProteinFactor = rhs.m_dProteinFactor;
 		while(a < m_lLength)	{
 			m_pList[a] += rhs.m_pList[a];
+			if(m_pList[a] > 0)	{
+				m_lHigh = a;
+			}
 			a++;
 		}
 		m_lSum += rhs.m_lSum;
@@ -493,7 +544,7 @@ public:
 	virtual float convert(const float _f)	{
 		return _f;
 	}
-	virtual int add(const long _c)	{
+	virtual int add(const int _c)	{
 		if(_c < m_lLength && _c > -1)	{
 			m_pList[_c]++;
 		}
@@ -540,7 +591,7 @@ public:
 /*
  * list returns a specified value from the stochastic distribution of the histogram
  */
-	int list(const unsigned long _l)	{
+	int list(const int _l)	{
 		return m_pList[_l];
 	}
 /*
@@ -550,6 +601,6 @@ public:
 		return m_lLength;
 	}
 private:
-	unsigned int m_pList[8]; // the histogram array
+	int m_pList[8]; // the histogram array
 };
 #endif //ifdef MHISTOGRAM_H

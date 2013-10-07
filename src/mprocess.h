@@ -165,29 +165,29 @@ public:
 	merrors(void) { 
 		m_bPpm = true; 
 		m_bIsotope = false;
-		m_fPlus = 100.; 
-		m_fMinus = 100.;
+		m_dPlus = 20.0; 
+		m_dMinus = 20.0;
 	}
 	virtual ~merrors(void) { }
 	bool m_bPpm;
 	bool m_bIsotope;
-	float m_fPlus;
-	float m_fMinus;
+	double m_dPlus;
+	double m_dMinus;
 	bool check(double _s,double _m)	{
-		float fDelta = (float)(_s - _m);
-		float fPlus = m_fPlus;
-		float fMinus = m_fMinus;
+		double dDelta = _s - _m;
+		double dPlus = m_dPlus;
+		double dMinus = m_dMinus;
 		if(m_bPpm)	{
-			fPlus *= (float)(_m*1.0e-6);
-			fMinus*= (float)(_m*1.0e-6);
+			dPlus *= _m*1.0e-6;
+			dMinus*= _m*1.0e-6;
 		}
-		if(fDelta < 0.0)	{
-			if(fDelta >= fMinus)	{
+		if(dDelta < 0.0)	{
+			if(dDelta >= dMinus)	{
 				return true;
 			}
 		}
 		else	{
-			if(fDelta <= fPlus)	{
+			if(dDelta <= dPlus)	{
 				return true;
 			}
 		}
@@ -195,27 +195,27 @@ public:
 			return false;
 		}
 		if(_s > 1000.0)	{
-			fDelta -= (float)1.00335;
-			if(fDelta < 0.0)	{
-				if(fDelta >= fMinus)	{
+			dDelta -= 1.008664916;
+			if(dDelta < 0.0)	{
+				if(dDelta >= dMinus)	{
 					return true;
 				}
 			}
 			else	{
-				if(fDelta <= fPlus)	{
+				if(dDelta <= dPlus)	{
 					return true;
 				}
 			}
 		}
 		if(_s > 1500.0)	{
-			fDelta -= (float)1.00335;
-			if(fDelta < 0.0)	{
-				if(fDelta >= fMinus)	{
+			dDelta -= 1.008664916;
+			if(dDelta < 0.0)	{
+				if(dDelta >= dMinus)	{
 					return true;
 				}
 			}
 			else	{
-				if(fDelta <= fPlus)	{
+				if(dDelta <= dPlus)	{
 					return true;
 				}
 			}
@@ -227,6 +227,7 @@ public:
 class mprocesslog
 {
 public:
+	mprocesslog() { }
 	virtual ~mprocesslog() { }
 	bool open(string &_s)	{
 		m_ofLog.open(_s.c_str());

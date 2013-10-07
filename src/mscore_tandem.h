@@ -132,7 +132,6 @@ The End
 #define MSCORE_TANDEM_H
 
 // File version: 2005-01-23
-
 #include "saxsaphandler.h"
 #include "mscore.h"
 #ifdef MSVC

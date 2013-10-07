@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2003 Ronald C Beavis, all rights reserved
+ Copyright (C) 2003-2013 Ronald C Beavis, all rights reserved
  X! tandem 
  This software is a component of the X! proteomics software
  development project
@@ -258,5 +258,5 @@ typedef map<string,string,less<string> > xMap;
 typedef map<string,bool> bMap;
 typedef pair<char,string> prSap;
 
-#define VERSION "Jackhammer (2013.06.15)"
+#define VERSION "Sledgehammer (2013.09.01.1)"
 

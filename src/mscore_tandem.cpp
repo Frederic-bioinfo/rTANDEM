@@ -236,7 +236,7 @@ bool mscore_tandem::add_mi(mspectrum &_s)
  * values in the existing map. this process makes the conversion from
  * floating point m/z values to integer SMap index values more accurate.
  * the half-width of the distribution around each initial value is set
- * by the m_fWidth value. For example, 
+ * by the m_dWidth value. For example, 
  *
  * if there is an intensity value I at index value N, 
  * then with a width of 2, the following new values are created,
@@ -256,32 +256,36 @@ __inline__ bool mscore_tandem::blur(vector<mi> &_s)
 	uType.m_lM = 0;
 	long lValue = 0;
 	long a = 0;
-	long w = (long)(0.1+m_fWidth);
+	long w = (long)(0.1+m_dWidth);
 /*
  * fConvert and fFactor are only used if the m_lErrorType uses ppm for fragment ion mass errors
  * if ppm is used, the width at m/z = 200.0 is taken as the base width for blurring & the
  * width is scaled by the measured m/z. 
  * NOTE: the m_fErr value used in the ppm case is: (the error in ppm) x 200
  */
-	float fConvert = (float)m_dErr/m_fWidth;
-	const float fFactor = (float)200.0/fConvert;
+	double dConvert = m_dErr/m_dWidth;
+	const double dFactor = 200.0/dConvert;
 	const size_t tSize = _s.size();
+	long u = w;
 	size_t tCount = 0;
 	vType.reserve(tSize*3);
 /*
- * add additional values based on the m_fWidth setting
+ * add additional values based on the m_dWidth setting
  */
 	while(tCount < tSize)	{
 		if(_s[tCount].m_fI > 0.5)	{
-			lValue = (long)(_s[tCount].m_fM/fConvert);
+			lValue = (long)((double)_s[tCount].m_fM/dConvert);
 			a = -1*w;
 			if(m_lErrorType & T_FRAGMENT_PPM)	{
-				a = (long)((float)a * (float)lValue/fFactor - 0.5);
+				a = (long)((double)a * (double)lValue/dFactor - 0.5);
 				if(a > -1*w)
 					a = -1*w;
 			}
-			while(a <= w)	{
-				if((long)(uType.m_lM) == lValue + a)	{
+			// u was added to correct an error: previously w was used as the upper limit for this calculation
+			// resulting in unbalanced ppm windows
+			u = -1*a;
+			while(a <= u)	{
+				if(uType.m_lM == lValue + a)	{
 					if(uType.m_fI < _s[tCount].m_fI)	{
 						vType.back().m_fI = _s[tCount].m_fI;
 					}
@@ -351,9 +355,11 @@ bool mscore_tandem::clear()
 double mscore_tandem::dot(unsigned long *_v)
 {
 	float fScore = 0.0;
+	float fValue0 = 0.0;
 	unsigned long a = 0;
 	unsigned long lCount = 0;
 	long lType = 0;
+	size_t b = 0;
 	vector<MIType>::iterator itType = m_vmiType[m_lId].begin();
 	// tType and tTypeSize were added in 2006.09.01 to correct a problem
 	// created by VC++ 2005. This new version uses a strict bounds checking
@@ -572,6 +578,10 @@ double mscore_tandem::dot(unsigned long *_v)
 */
 float mscore_tandem::ion_check(const unsigned long _v,const size_t _s)
 {
+	unsigned long a = 0;
+	unsigned long lCount = 0;
+	long lType = 0;
+	size_t b = 0;
 	vector<MIType>::iterator itType = m_vmiType[_s].begin();
 	vector<MIType>::const_iterator itStart = m_vmiType[_s].begin();
 	vector<MIType>::const_iterator itEnd = m_vmiType[_s].end();

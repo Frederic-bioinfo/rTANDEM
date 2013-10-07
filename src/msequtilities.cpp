@@ -450,7 +450,7 @@ bool msequtilities::modify_annotation(string &_s)
 	double fValue = 0.0;
 	double fPrompt = 0.0;
 	string strValue = _s;
-	if(!_s.empty())	{
+	if(!_s.empty() && *strValue.rbegin() != ',')	{
 		strValue += ",";
 	}
 	strValue += m_strDefaultMaybe;

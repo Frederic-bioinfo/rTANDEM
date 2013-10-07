@@ -231,10 +231,14 @@ env1$domain.attrs    <- NULL
 env1$content         <- NULL
 
 text <- function(content,...) { ##handler function
-  env1$content <- content
+  env1$content <- paste(env1$content, content, sep="")
 }
 environment(text) <- env1
 
+endElement <- function(name, attrs, ...){
+  env1$content <- ""
+}
+  
 group <- function(name, attrs, ...){ ##handler function
   env1$group.attrs <- attrs
   if ("parameters" %in% env1$group.attrs) {
@@ -285,10 +289,11 @@ domain <- function(name, attrs, ...) { #handler function
   env1$domain.attrs <- attrs
   env1$pep.key <- env1$pep.key + 1L
 
-  if(! env1$content=="") {
-    set(env1$prot.dt, env1$prot.key, 4L, env1$content)
+  sequence <- gsub("\\s","", env1$content)
+  if( nchar(sequence) != 0) {
+    set(env1$prot.dt, env1$prot.key, 4L, sequence)
   }
-
+  
   if( env1$pep.dt.key  < env1$pep.key) {
     pep2.dt  <- data.table("prot.uid"=rep(0L,1000), "pep.id"=rep("",1000), "spectrum.id"=rep(0L,1000), "spectrum.mh"=rep(0.0,1000), "spectrum.z"=rep(0L,1000),"spectrum.sumI"=rep(0.0,1000), "spectrum.maxI"=rep(0.0,1000), "spectrum.fI"=rep(0.0,1000), "expect.value"=rep(0.0,1000), "tandem.score"=rep(0.0,1000), "mh"=rep(0.0,1000), "delta"=rep(0.0,1000), "peak.count"=rep(as.integer(0),1000), "missed.cleavages"=rep(0L,1000), "start.position"=rep(0L,1000), "end.position"=rep(0L,1000), "sequence"=rep("",1000) )
     env1$pep.dt   <- rbindlist(list(env1$pep.dt, pep2.dt))
@@ -409,7 +414,7 @@ note <- function(x, ...) { #branches function
 environment(note) <- env1
 
 
-xmlEventParse(xml.file, handlers=list(group=group, protein=protein, file=file, domain=domain, aa=aa, text=text), branches=list(note=note))
+xmlEventParse(xml.file, handlers=list(group=group, protein=protein, file=file, domain=domain, aa=aa, text=text, endElement=endElement), branches=list(note=note))
 
 # Removing empty rows from prot.dt, pep.dt and ptm.dt
 env1$prot.dt <- subset(env1$prot.dt, uid != 0L)
