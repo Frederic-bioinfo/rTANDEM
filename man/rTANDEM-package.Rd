@@ -5,22 +5,22 @@
 An R encapsulation of X!TANDEM ('Jackhammer' release, 2013.06.15)
 }
 \description{
-X!Tandem is an open source software for protein identification from
-tandem mass spectrometry experiments, and rTANDEM is an R encapsulation
-of this software. As of now, rTANDEM provides a very basic encapsulation
-of X!Tandem: it has a function that takes as an argument the path to an
-X!Tandem style parameter file and return the path to an X!tandem style
-output file. The package also presents some function to transform
-parameters or results files into R objects and vice versa. We are
-planning to add functions for visualisation, data manipulation and
-conversion in a near future. 
+X!Tandem is an open source software for protein identification by
+tandem mass spectrometry, and rTANDEM encapsultates this software in R.
+rTANDEM provides a basic encapsulation of X!Tandem: it has a function
+that takes as an argument the path to an X!Tandem style parameter file
+and return the path to an X!tandem style output file. The package
+also presents functions to transform parameters or results files
+into R objects and vice versa. Some functions are also available to
+examine the results within R. An associated package, shinyTANDEM,
+provides a graphical interface to visualize results objects. 
 }
 \details{
 \tabular{ll}{
 Package: \tab rTANDEM\cr
 Type: \tab Package\cr
-Version: \tab 0.99.4\cr
-Date: \tab 2012-10-22\cr
+Version: \tab 1.2.3\cr
+Date: \tab 2013-11-07\cr
 License: \tab Artistic License 1.0\cr
 }
 }
