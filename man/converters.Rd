@@ -1,11 +1,16 @@
-\name{conversion}
+\name{converters}
+\alias{getTaxoFromXML}
 \alias{GetTaxoFromXML}
+\alias{getParamFromXML}
 \alias{GetParamFromXML}
+\alias{getResultsFromXML}
 \alias{GetResultsFromXML}
+\alias{writeParamToXML}
 \alias{WriteParamToXML}
+\alias{writeTaxoToXML}
 \alias{WriteTaxoToXML}
 \title{
-Convert X!Tandem xml files to R objects and vice versa  
+Converts X!Tandem xml files to R objects and vice versa  
 }
 \description{
 Functions like \code{GetTaxoFromXML("pathToXML")},

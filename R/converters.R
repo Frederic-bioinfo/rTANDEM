@@ -179,7 +179,7 @@ env1                         <- new.env()
 
 # Result file
 env1$results                 <- new('rTResult')
-env1$results@used.parameters <- rTParam()
+env1$results@used.parameters <- as.data.frame(rTParam())
 env1$results@result.file     <- xml.file
 
 # Temporary information holders

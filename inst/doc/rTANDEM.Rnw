@@ -39,10 +39,9 @@ X!Tandem is an open source software for protein identification by tandem mass sp
 \section{rTANDEM input/output overview}
 
 The input of a standard X!Tandem analysis is composed of several files: three .xml files setting the parameters (usually named input.xml, default-input.xml and taxonomy.xml), one or more database files, and one or more files containing the spectra to be analyzed. Detailed information is available on the \href{www.thegpm.org/TANDEM/index.html}{X!Tandem website}. rTANDEM can use the xml files just like X!Tandem, or R objects can be used in lieu of the .xml files. rTANDEM provides functions to create parameters or taxonomy objects from xml files, or to create the xml files from the R parameters or taxonomy objects.
-The output of a standard X!Tandem analysis is composed of a standard xml file. Since this output can be quite large, rTANDEM follows X!Tandem behaviour and writes the result of the analysis to an xml file. But the package provides a function to parse this file an create an R object from it. 
+The output of a standard X!Tandem analysis is composed of a standard xml file. Since this output can be quite large, rTANDEM follows X!Tandem behaviour and writes the result of the analysis to an xml file instead of directly creating an R object with the result. (This behaviour allows you to launch a script that will run several analysis without worrying about running out of memory.) The package provides a function to parse result files and create an R object from it. 
 
 \subsection{The input file}
-
 The main input file is used to fix the major parameters of the search, namely
 \begin{enumerate}
 \item The path of the output file (the file that will be used to store the results).
@@ -77,6 +76,36 @@ The default-parameter file also provides links to formatting files (css and xsl)
 The official API for x!tandem parameters is described here: http://thegpm.org/TANDEM/api/
 Some parameters are accepted even though they are not part of the official API. A list of such parameters can be found at: http://tools.proteomecenter.org/wiki/index.php?title=TPP:X!Tandem\_the\_TPP
 The k-score scoring function is now available in rTANDEM. To use this scoring function, set the parameter 'scoring, algorithm' to 'k-score'. 
+
+\section{Dealing with parameters in R objects}
+The parameters that can be passed to the TANDEM algorithm are numerous: over a hundred! Dealing with this can be cumbersome, but rTANDEM features some functions to make it easier.\\
+First, let's introduce a distinction between four levels of parameters: search specific, instrument specific, general parameters, and taxonomies. The search specific parameters are information like the data file to be searched and the taxon to be used: those parameters will likely change with every new analysis. Instrument specific parameters are settings like the mass error of your spectrometer at the ms1 and ms2 levels. They are unlikely to change for any search done on a given spectrometer. Then, there are more general parameters that concern anything from the enzyme used to the fine tuning of the algorithm or the output options. Those parameters change rather rarely. Finally, there are the parameters related to taxonomy: they link the taxon to be searched to one or more fasta file.\\
+Given those levels of parameters, rTANDEM proposes a particular syntax and some functions to make it easier to launch analysis and deal with parameters. The launching syntax is:\begin{tt}rtandem( data.file, taxon, taxonomy, default.parameters ) \end{tt}. This syntax put the search-specific parameter directly in the function call, so you are not forced to create a full parameter object (or file) for every new search. Instead, you will need two objects, a taxonomy and a parameter, that won't change very often.\\
+To create those objects, rTANDEM features many functions: 
+\begin{enumerate}
+\item\begin{tt}param <- getParamFromXML(parameter\_file.xml)\end{tt} let's you import parameters from an xml file, from a published method for example.
+\item\begin{tt}param <- rTParam()\end{tt} let's you initialize a parameter object with no fixed parameter.  
+\item\begin{tt}param <- setParamDefault()\end{tt} let's you quickly set over 30 general parameters to sensible default values.
+\item\begin{tt}param <- setParamOrbitrap()\end{tt} let's you quickly set instrument-specific parameters with sensible values for orbitrap mass spectrometer (like Thermo Scientific's Orbitrap). 
+\item\begin{tt}param <- setParamQuadTof05Da()\end{tt} let's you quickly set instrument-specific parameters with sensible values for quad-tof mass spectrometer (like AB-Sciex's QStar).
+\item\begin{tt}param <- setParamQuadTof100ppm(paramObject)\end{tt} let's you quickly set instrument-specific parameters with sensible values for high resolution quad-tof mass spectrometer (like AB-Sciex's QStar Elite).
+\item\begin{tt}param <- setParamIonTrap()\end{tt} let's you quickly set instrument-specific parameters with sensible values for ion trap spectrometer (like Thermo Scientific's LTQ). 
+\item\begin{tt}param <- setParamValue(param, category, parameter, value)\end{tt} let's you change the value of a specific parameter identified by it's category and name. 
+\item\begin{tt}taxonomy <- getTaxoFromXML(taxonomy\_file.xml)\end{tt} let's you import taxonomy information from an xml file.
+\item\begin{tt}taxonomy <- rTTaxo(taxon, format, URL)\end{tt} let's you initialize a new taxonomy object with optional data.
+\item\begin{tt}taxonomy <- addTaxon(taxonomy, taxon, format, URL)\end{tt} let's you add a new taxon to your taxonomy object (or add new URL to a taxon).
+\end{enumerate}
+
+\subsection{Example of parameter usage}
+Let's say your lab owns two of different mass spectrometers: a 5600-TripleTof and a LTQ. It would be useful to have two different parameter objects with the most appropriate settings for those two instruments. To do this, you should first set the default parameters and check that their value correspond to what you need, then add instrument-specific values. \\
+\begin{tt}default.params <- setParamDefault()\end{tt} will give you a parameter object with sensible default values. But you should definitely check it's content: \begin{tt}print.rTParam(default.params)\end{tt} will show the defined parameters with minimal formatting. Looking at the default values, you might realize that your lab function differently. For example, the default cleavage correspond to trypsin ('[RK]|\{P\}'). Let's say that you lab use LysC instead, you will need to change this parameter: \begin{tt}default.params <- setParamValue(default.param, 'protein', 'cleavage site', '[K]|\{P\}')\end{tt}.\\
+When the default parameter correspond to your need, you can create two parameter objects corresponding to your instruments by adding instrument-specific parameters to what you already have: \\
+\begin{tt}ltq.params <- setParamIonTrap(default.params) 
+5600.params <- setParamQuadTof100ppm(default.params)
+\end{tt}\\
+You now have default parameters with sensible default values for your two instruments. You still need a taxonomy object. Let's say that these days you are working on human and have downloaded a recent version of Uniprot's complete proteome set for Homo sapiens. Your taxonomy object can be created quickly:\begin{tt}taxonomy <- rTTaxo(taxon='human', format='peptide', URL='/path/to/your/fasta/file')\end{tt}. Other taxon can be added to this object later using the \begin{tt}addTaxon\end{tt} function.\\
+Those objects now allow you to use the \begin{tt}rtandem\end{tt} syntax to launch analysis. For example, to analyse data obtained from your 5600, you would use:
+\begin{tt}result <- rtandem('path/to/your/data/file', 'human', taxonomy, 5600.params)\end{tt}
 
 \section{rTANDEM typical usage}
 
