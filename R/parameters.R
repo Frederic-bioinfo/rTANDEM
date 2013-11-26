@@ -272,7 +272,7 @@ setParamIonTrap <- function(param=NULL) {
   return(param)
 }
 
-rTTaxo <- function(taxon, format="peptide", URL) {
+rTTaxo <- function(taxon=NA, format=NA, URL=NA) {
   # Constructor method for rTTaxo
   # Args:
   #    taxon : A taxon for the taxonomy (eg. "yeast") or a vector of taxa.
@@ -281,7 +281,7 @@ rTTaxo <- function(taxon, format="peptide", URL) {
   # Returns:
   #    A rTTaxo object.
 
-  if( ! format %in% c("peptide", "spectrum", "saps", "mods") ){
+  if( ! format %in% c(NA, "peptide", "spectrum", "saps", "mods") ){
     warning(paste("\"", format, "\" might not be recognized. The four formats of database for tandem are: peptide, spectrum, mods, and saps.", sep=""))
   }
   

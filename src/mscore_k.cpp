@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
+/*
+ * Adapted for rTANDEM from TPP project (tools.proteomecenter.org/wiki/) on 2013-11-26 
+ */
+
+
 #include "stdafx.h"
 #include "msequence.h"
 #include "mspectrum.h"
@@ -137,11 +142,17 @@ bool mscore_k::add_mi(mspectrum &_s)
 
     // Screen peeks on upper end.
     int endMassMax = (int)(((_s.m_dMH + (_s.m_fZ - 1) * m_seqUtil.m_dProton) / _s.m_fZ) * 2.0 + 0.5) + iWindowCount;
-    while (endMass >= endMassMax) {
+while (itMI != itEnd && endMass >= endMassMax) {
         itEnd--;
         endMass = imass(itEnd[-1].m_fM);
     }
 
+if (itMI == itEnd) // No peaks left.
+{
+// Return value appears to be ignored, so just add empty type.
+m_vmiType.push_back(vType);
+return true;
+}
     tempLookup.init(max(0, startMass - 50), endMass + 50);
 
     if (tempLookup.m_end > m_maxEnd)
@@ -290,9 +301,9 @@ double mscore_k::sfactor()
 /*
  * report_score formats a hyper score for output.
  */
-void mscore_k::report_score(char* buffer, float hyper)
+void mscore_k::report_score(char* buffer, float hyperscore)
 {
-    sprintf(buffer, "%d",(int) (hyper + 0.5));
+sprintf(buffer, "%d",(int) (hyperscore + 0.5));
 }
 
 /*
@@ -362,6 +373,417 @@ double mscore_k::dot(unsigned long *_v)
     return (dScore);
 }
 
-float mscore_k::ion_check(unsigned long foo, size_t bar){
-  return 0.0f;
+float mscore_k::ion_check(const unsigned long _v,const size_t _d)
+{
+unsigned long a = 0;
+unsigned long lCount = 0;
+long lType = 0;
+size_t b = 0;
+vector<MIType>::iterator itType = m_vmiType[_d].begin();
+vector<MIType>::const_iterator itStart = m_vmiType[_d].begin();
+vector<MIType>::const_iterator itEnd = m_vmiType[_d].end();
+// tType and tTypeSize were added in 2006.09.01 to correct a problem
+// created by VC++ 2005. This new version uses a strict bounds checking
+// style for STL iterators, that cause a run time error if an iterator
+// longer than .end() is produced by incrementing the iterator.
+size_t tTypeSize = m_vmiType[_d].size();
+size_t tType = tTypeSize/2;
+float fV = (float)1.0;
+itType += tType;
+if(itType->m_lM == _v)	{
+fV = itType->m_fI;
+return fV;
+}
+else if(_v > itType->m_lM)	{
+itType++;
+while(itType != itEnd)	{
+if(itType->m_lM == _v)	{
+fV = itType->m_fI;
+return fV;
+}
+if(_v < itType->m_lM)	{
+return fV;
+}
+itType++;
+}
+return fV;
+}
+else	{
+itType--;
+while(itType != itStart)	{
+if(itType->m_lM == _v)	{
+fV = itType->m_fI;
+return fV;
+}
+if(_v > itType->m_lM)	{
+return fV;
+}
+itType--;
+}
+return fV;
+}
+return fV;
+}
+/*
+* create list of non-zero predicted intensity values for a-ions and their
+* integer converted m/z values
+*/
+bool mscore_k::add_A(const unsigned long _t,const long _c)
+{
+unsigned long a = 0;
+/*
+* get the conversion factor between a straight sequence mass and an a-ion
+*/
+double dValue = m_pSeqUtilFrag->m_dA;
+/*
+* deal with protein N-terminus
+*/
+if(m_bIsN)	{
+dValue += m_pSeqUtilFrag->m_fNT;	
+}
+/*
+* deal with non-hydrolytic cleavage
+*/
+dValue += (m_pSeqUtilFrag->m_dCleaveN - m_pSeqUtilFrag->m_dCleaveNdefault);
+if(m_Term.m_lN)	{
+dValue += m_pSeqUtilFrag->m_pdAaMod['['];
+}
+dValue += m_pSeqUtilFrag->m_pdAaFullMod['['];
+unsigned long lValue = 0;
+/*
+* calculate the conversion factor between an m/z value and its integer value
+* as referenced in m_vsmapMI
+*/
+size_t tC = 0;
+float *pfScore = m_pSeqUtilFrag->m_pfAScore;
+unsigned long lCount = 0;
+/*
+* from N- to C-terminus, calcuate fragment ion m/z values and store the results
+* look up appropriate scores from m_pSeqUtilFrag->m_pfAScore
+*/
+const unsigned long tPos = (unsigned long) m_tSeqPos;
+m_dWE = m_dWidth/m_dErr;
+const double dZ = (double)_c;
+while(a < m_lSeqLength)	{
+tC = m_pSeq[a];
+dValue += m_pSeqUtilFrag->getAaMass((char)tC, tPos+a);
+lValue = mconvert(dValue, _c);
+m_plSeq[lCount] = lValue;
+m_pfSeq[lCount] = pfScore[tC];
+lCount++;
+a++;
+}
+/*
+* set the next integer mass value to 0: this marks the end of the array
+*/
+m_lCount = lCount;
+m_plSeq[lCount] = 0;
+return true;
+}
+/*
+* create list of non-zero predicted intensity values for b-ions and their
+* integer converted m/z values
+*/
+bool mscore_k::add_B(const unsigned long _t,const long _c)
+{
+unsigned long a = 0;
+/*
+* get the conversion factor between a straight sequence mass and a b-ion
+*/
+double dValue = m_pSeqUtilFrag->m_dB;
+/*
+* deal with protein N-terminus
+*/
+if(m_bIsN)	{
+dValue += m_pSeqUtilFrag->m_fNT;	
+}
+/*
+* deal with non-hydrolytic cleavage
+*/
+dValue += (m_pSeqUtilFrag->m_dCleaveN - m_pSeqUtilFrag->m_dCleaveNdefault);
+if(m_Term.m_lN)	{
+dValue += m_pSeqUtilFrag->m_pdAaMod['['];
+}
+dValue += m_pSeqUtilFrag->m_pdAaFullMod['['];
+unsigned long lValue = 0;
+/*
+* calculate the conversion factor between an m/z value and its integer value
+* as referenced in m_vsmapMI
+*/
+long lCount = 0;
+float *pfScore = m_pSeqUtilFrag->m_pfBScore;
+float *pfScorePlus = m_pSeqUtilFrag->m_pfYScore;
+/*
+* from N- to C-terminus, calcuate fragment ion m/z values and store the results
+* look up appropriate scores from m_pSeqUtilFrag->m_pfBScore
+*/
+const unsigned long tPos = (unsigned long) m_tSeqPos;
+size_t tC = 0;
+m_dWE = m_dWidth/m_dErr;
+const double dZ = (double)_c;
+while(a < m_lSeqLength-1)	{
+tC = m_pSeq[a];
+dValue += m_pSeqUtilFrag->getAaMass((char)tC, tPos+a);
+lValue = mconvert(dValue, _c);
+m_plSeq[lCount] = lValue;
+m_pfSeq[lCount] = pfScore[tC]*pfScorePlus[m_pSeq[a+1]];
+if(a == 1)	{
+if(m_pSeq[1] == 'P')	{
+m_pfSeq[lCount] *= 10;
+}
+else	{
+m_pfSeq[lCount] *= 3;
+}
+}
+lCount++;
+a++;
+}
+m_lCount = lCount;
+m_plSeq[lCount] = 0;
+return true;
+}
+/*
+* create list of non-zero predicted intensity values for c-ions and their
+* integer converted m/z values
+*/
+bool mscore_k::add_C(const unsigned long _t,const long _c)
+{
+unsigned long a = 0;
+/*
+* get the conversion factor between a straight sequence mass and a b-ion
+*/
+double dValue = m_pSeqUtilFrag->m_dC;
+/*
+* deal with protein N-terminus
+*/
+if(m_bIsN)	{
+dValue += m_pSeqUtilFrag->m_fNT;	
+}
+/*
+* deal with non-hydrolytic cleavage
+*/
+dValue += (m_pSeqUtilFrag->m_dCleaveN - m_pSeqUtilFrag->m_dCleaveNdefault);
+if(m_Term.m_lN)	{
+dValue += m_pSeqUtilFrag->m_pdAaMod['['];
+}
+dValue += m_pSeqUtilFrag->m_pdAaFullMod['['];
+unsigned long lValue = 0;
+/*
+* calculate the conversion factor between an m/z value and its integer value
+* as referenced in m_vsmapMI
+*/
+size_t tC = 0;
+long lCount = 0;
+float *pfScore = m_pSeqUtilFrag->m_pfBScore;
+float *pfScorePlus = m_pSeqUtilFrag->m_pfYScore;
+/*
+* from N- to C-terminus, calcuate fragment ion m/z values and store the results
+* look up appropriate scores from m_pSeqUtilFrag->m_pfBScore
+*/
+m_dWE = m_dWidth/m_dErr;
+double dZ = (double)_c;
+const unsigned long tPos = (unsigned long) m_tSeqPos;
+while(a < m_lSeqLength-2)	{
+tC = m_pSeq[a];
+dValue += m_pSeqUtilFrag->getAaMass((char)tC, tPos+a);
+lValue = mconvert(dValue, _c);
+m_plSeq[lCount] = lValue;
+m_pfSeq[lCount] = pfScore[tC]*pfScorePlus[m_pSeq[a+1]];
+lCount++;
+a++;
+}
+m_lCount = lCount;
+m_plSeq[lCount] = 0;
+return true;
+}
+/*
+* create list of non-zero predicted intensity values for x-ions and their
+* integer converted m/z values
+*/
+bool mscore_k::add_X(const unsigned long _t,const long _c)
+{
+long a = m_lSeqLength - 1;
+/*
+* get the conversion factor between a straight sequence mass and an x-ion
+*/
+double dValue = m_pSeqUtilFrag->m_dX;
+/*
+* deal with non-hydrolytic cleavage
+*/
+dValue += (m_pSeqUtilFrag->m_dCleaveC - m_pSeqUtilFrag->m_dCleaveCdefault);
+if(m_Term.m_lC)	{
+dValue += m_pSeqUtilFrag->m_pdAaMod[']'];
+}
+dValue += m_pSeqUtilFrag->m_pdAaFullMod[']'];
+/*
+* deal with protein C-teminus
+*/
+if(m_bIsC)	{
+dValue += m_pSeqUtilFrag->m_fCT;	
+}
+unsigned long lValue = 0;
+/*
+* calculate the conversion factor between an m/z value and its integer value
+* as referenced in m_vsmapMI
+*/
+size_t tC = 0;
+unsigned long lCount = 0;
+float fSub = 0.0;
+float *pfScore = m_pSeqUtilFrag->m_pfXScore;
+/*
+* from C- to N-terminus, calcuate fragment ion m/z values and store the results
+* look up appropriate scores from m_pSeqUtilFrag->m_pfAScore
+*/
+m_dWE = m_dWidth/m_dErr;
+double dZ = (double)_c;
+const unsigned long tPos = (unsigned long) m_tSeqPos;
+while(a > 0)	{
+tC = m_pSeq[a];
+dValue += m_pSeqUtilFrag->getAaMass((char)tC, tPos+a);
+lValue = mconvert(dValue, _c);
+m_plSeq[lCount] = lValue;
+m_pfSeq[lCount] = pfScore[tC];
+lCount++;
+a--;
+}
+/*
+* set the next integer mass value to 0: this marks the end of the array
+*/
+m_lCount = lCount;
+m_plSeq[lCount] = 0;
+return true;
+}
+/*
+* create list of non-zero predicted intensity values for y-ions and their
+* integer converted m/z values
+*/
+bool mscore_k::add_Y(const unsigned long _t,const long _c)
+{
+long a = m_lSeqLength - 1;
+/*
+* get the conversion factor between a straight sequence mass and a y-ion
+*/
+double dValue = m_pSeqUtilFrag->m_dY;
+unsigned long lValue = 0;
+/*
+* deal with non-hydrolytic cleavage
+*/
+dValue += (m_pSeqUtilFrag->m_dCleaveC - m_pSeqUtilFrag->m_dCleaveCdefault);
+if(m_Term.m_lC)	{
+dValue += m_pSeqUtilFrag->m_pdAaMod[']'];
+}
+dValue += m_pSeqUtilFrag->m_pdAaFullMod[']'];
+/*
+/*
+* deal with protein C-teminus
+*/
+if(m_bIsC)	{
+dValue += m_pSeqUtilFrag->m_fCT;	
+}
+unsigned long lCount = 0;
+float fSub = 0.0;
+float *pfScore = m_pSeqUtilFrag->m_pfYScore;
+float *pfScoreMinus = m_pSeqUtilFrag->m_pfBScore;
+/*
+* from C- to N-terminus, calcuate fragment ion m/z values and store the results
+* look up appropriate scores from m_pSeqUtilFrag->m_pfAScore
+*/
+long tPos = (unsigned long) m_tSeqPos;
+size_t tC = 0;
+m_dWE = m_dWidth/m_dErr;
+double dZ = (double)_c;
+bool bZero = false;
+if(_t == 0)	{
+bZero = true;
+}
+while(a > 0)	{
+tC = m_pSeq[a];
+dValue += m_pSeqUtilFrag->getAaMass((char)tC, tPos+a);
+lValue = mconvert(dValue, _c);
+if(bZero)	{
+if(a < 5)	{
+m_plSeq[lCount] = lValue;
+m_pfSeq[lCount] = pfScore[tC]*pfScoreMinus[m_pSeq[a-1]];
+lCount++;
+}
+}
+else	{
+m_plSeq[lCount] = lValue;
+m_pfSeq[lCount] = pfScore[tC]*pfScoreMinus[m_pSeq[a-1]];
+if(a == 2)	{
+if(m_pSeq[1] == 'P')	{
+m_pfSeq[lCount] *= 10;
+}
+else	{
+m_pfSeq[lCount] *= 3;
+}
+}
+lCount++;
+}
+a--;
+}
+/*
+* set the next integer mass value to 0: this marks the end of the array
+*/
+m_lCount = lCount;
+m_plSeq[lCount] = 0;
+return true;
+}
+/*
+* create list of non-zero predicted intensity values for y-ions and their
+* integer converted m/z values
+*/
+bool mscore_k::add_Z(const unsigned long _t,const long _c)
+{
+long a = m_lSeqLength - 1;
+/*
+* get the conversion factor between a straight sequence mass and a y-ion
+*/
+double dValue = m_pSeqUtilFrag->m_dZ;
+unsigned long lValue = 0;
+/*
+* deal with non-hydrolytic cleavage
+*/
+dValue += (m_pSeqUtilFrag->m_dCleaveC - m_pSeqUtilFrag->m_dCleaveCdefault);
+if(m_Term.m_lC)	{
+dValue += m_pSeqUtilFrag->m_pdAaMod[']'];
+}
+dValue += m_pSeqUtilFrag->m_pdAaFullMod[']'];
+/*
+/*
+* deal with protein C-teminus
+*/
+if(m_bIsC)	{
+dValue += m_pSeqUtilFrag->m_fCT;	
+}
+size_t tC = 0;
+unsigned long lCount = 0;
+float fSub = 0.0;
+float *pfScore = m_pSeqUtilFrag->m_pfYScore;
+float *pfScoreMinus = m_pSeqUtilFrag->m_pfBScore;
+/*
+* from C- to N-terminus, calcuate fragment ion m/z values and store the results
+* look up appropriate scores from m_pSeqUtilFrag->m_pfAScore
+*/
+m_dWE = m_dWidth/m_dErr;
+double dZ = (double)_c;
+const unsigned long tPos = (unsigned long) m_tSeqPos;
+while(a > 0)	{
+tC = m_pSeq[a];
+dValue += m_pSeqUtilFrag->getAaMass((char)tC, tPos+a);
+lValue = mconvert(dValue, _c);
+m_plSeq[lCount] = lValue;
+m_pfSeq[lCount] = pfScore[tC]*pfScoreMinus[m_pSeq[a-1]];
+lCount++;
+m_plSeq[lCount] = mconvert(dValue+m_pSeqUtilFrag->m_dHydrogen, dZ);
+m_pfSeq[lCount] = pfScore[tC]*pfScoreMinus[m_pSeq[a-1]];
+lCount++;
+a--;
+}
+/*
+* set the next integer mass value to 0: this marks the end of the array
+*/
+m_lCount = lCount;
+m_plSeq[lCount] = 0;
+return true;
 }

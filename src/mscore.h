@@ -470,12 +470,14 @@ protected:
 	PermuteState m_psPermute;
 
 protected:
-	bool add_A(const unsigned long _t,const long _c);
-	bool add_B(const unsigned long _t,const long _c);
-	bool add_C(const unsigned long _t,const long _c);
-	bool add_Y(const unsigned long _t,const long _c);
-	bool add_X(const unsigned long _t,const long _c);
-	bool add_Z(const unsigned long _t,const long _c);
+	// The virtual was added in rTANDEM 2013-11 to allow the use of
+	// the k-score algorithm.
+	virtual bool add_A(const unsigned long _t,const long _c);
+	virtual bool add_B(const unsigned long _t,const long _c);
+	virtual bool add_C(const unsigned long _t,const long _c);
+	virtual bool add_Y(const unsigned long _t,const long _c);
+	virtual bool add_X(const unsigned long _t,const long _c);
+	virtual bool add_Z(const unsigned long _t,const long _c);
 	bool check_parents(void);
 	bool load_next_pam(void);
 	bool load_next_sap(void);

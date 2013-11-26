@@ -13,6 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+/*
+ * Adapted from TPP project (tools.proteomecenter.org/wiki/) on 2013-11-26 
+ */
+
 #include "mscore.h"
 
 class miLookup
@@ -109,10 +114,8 @@ public:
 
 protected:
     virtual double dot(unsigned long *_v); // this is where the real scoring happens
-    ////////////////////////
-    float ion_check(unsigned long foo, size_t bar);
-    ////////////////////////
-
+    virtual float ion_check(const unsigned long _v, const size_t d);
+    
 protected:
     unsigned long imass(double _m)
     {
@@ -125,7 +128,21 @@ protected:
     vector<vmiType> m_vmiType;
 
     double m_dIsotopeCorrection;
-};
+
+ protected:
+    virtual bool add_A(const unsigned long _t,const long _c);
+    virtual bool add_B(const unsigned long _t,const long _c);
+    virtual bool add_C(const unsigned long _t,const long _c);
+    virtual bool add_Y(const unsigned long _t,const long _c);
+    virtual bool add_X(const unsigned long _t,const long _c);
+    virtual bool add_Z(const unsigned long _t,const long _c);
+    bool check_parents(void);
+    bool load_next_pam(void);
+    bool load_next_sap(void);
+    bool check_pam_mass();
+    bool load_next_term(void);
+    bool run_state_machine(void);
+ };
 
 /*
  * mscorefactory_k implements a factory for creating mscore_k instances.

@@ -25,7 +25,7 @@ setParamOrbitrap(param=NULL)
 setParamIonTrap(param=NULL)
 setParamQuadTof05da(param=NULL)
 setParamQuadTof100ppm(param=NULL)
-rTTaxo(taxon, format="peptide", URL)
+rTTaxo(taxon=NA, format=NA, URL=NA)
 addTaxon(taxonomy=NULL, taxon, format="peptide", URL)
 \method{print}{rTParam}(x, ...)
 }
