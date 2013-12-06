@@ -30,4 +30,10 @@ setClass("rTResult",
            )
          )
 
+# rTResult_s is an extension of rTResult that accomodates spectra.
+setClass("rTResult_s",
+         contains="rTResult",
+         representation=representation(spectra="data.table")
+         )
 
+setIs("rTResult_s", "rTResult")

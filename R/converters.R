@@ -8,7 +8,7 @@ GetTaxoFromXML <- function(xml.file) {
   if (file.access(xml.file, mode=4) == -1) {
     stop(as.character(xml.file), " cannot be read. Verify that the file exists and that you have the permissions necessary to read it.", call. = TRUE)
   }
-  
+
   taxo.doc <- xmlTreeParse(xml.file, getDTD = FALSE, useInternalNodes = TRUE)   
   length <- length(getNodeSet(taxo.doc, "//file"))
   taxo.root <- xmlRoot(taxo.doc)
@@ -168,9 +168,10 @@ GetResultsFromXML <- function(xml.file) {
   # Returns:
   #    an object of the class rTResult
 
-  ## Dummy declaration to prevent "no visible binding" when using data.table subset:
-  uid=prot.uid=at=pep.id=NULL
-  rm(uid, prot.uid, at, pep.id)
+  ## Dummy declaration to prevent "no visible binding"
+  ## when using data.table accessors:
+  uid=prot.uid=at=pep.id=`M+H`=charge=id=NULL
+  rm(uid, prot.uid, at, pep.id, id, charge, `M+H`)
   
 if (file.access(xml.file, mode=4) == -1)
   stop(as.character(xml.file), " cannot be read. Verify that the file exists and that you have the permissions necessary to read it.", call. = TRUE)
@@ -178,7 +179,7 @@ if (file.access(xml.file, mode=4) == -1)
 env1                         <- new.env()
 
 # Result file
-env1$results                 <- new('rTResult')
+env1$results                 <- new('rTResult_s')
 env1$results@used.parameters <- as.data.frame(rTParam())
 env1$results@result.file     <- xml.file
 
@@ -213,16 +214,30 @@ env1$ptm.dt  <- data.table("pep.id"=rep("",1000),
                            "at"=rep(0L,1000),
                            "modified"=rep(0,1000) )
 
+env1$spectra.dt <- data.table("id"=rep("", 1000),
+                              "label"=rep("",1000),
+                              "mh"=rep(0, 1000),
+                              "charge"=rep(0L, 1000),
+                              "num.values"=rep(0L, 1000),
+                              "Xdata"=rep("",1000), # list of values stored as string
+                              "Xunit"=rep("", 1000),
+                              "Ydata"=rep("",1000), # list of values stored as string
+                              "Yunit"=rep("",1000)
+                              )
+
 # Booleans and counters for tree navigation
 env1$perform.params  <- FALSE
 env1$used.params     <- FALSE
 env1$unused.params   <- FALSE
+env1$spectrum        <- FALSE
 env1$prot.key        <- 0L
 env1$pep.key         <- 0L
 env1$ptm.key         <- 0L
+env1$spectrum.key    <- 0L
 env1$ptm.dt.key      <- 1000L
 env1$pep.dt.key      <- 1000L
 env1$prot.dt.key     <- 1000L
+env1$spectra.dt.key  <- 1000L 
 
 # node attributes information (to be accessed by the children nodes)
 env1$group.attrs     <- NULL
@@ -241,24 +256,23 @@ endElement <- function(name, attrs, ...){
   
 group <- function(name, attrs, ...){ ##handler function
   env1$group.attrs <- attrs
+  
+  ## Set booleans for quicker navigation:
+  env1$perform.params <- FALSE
+  env1$used.params    <- FALSE
+  env1$unused.params  <- FALSE
+  env1$spectrum       <- FALSE
   if ("parameters" %in% env1$group.attrs) {
     if ('performance parameters' %in% env1$group.attrs) {
       env1$perform.params <- TRUE
-      env1$used.params    <- FALSE
-      env1$unused.params  <- FALSE
     } else if ('unused input parameters' %in% env1$group.attrs) {
-      env1$perform.params <- FALSE
-      env1$used.params    <- FALSE
       env1$unused.params  <- TRUE
     } else if ('input parameters' %in% env1$group.attrs) {
-      env1$perform.params <- FALSE
       env1$used.params    <- TRUE
-      env1$unused.params  <- FALSE
-    } else {
-      env1$perform.params <- FALSE
-      env1$used.params    <- FALSE
-      env1$unused.params  <- FALSE
     }
+  } else if ("fragment ion mass spectrum" %in% env1$group.attrs) {
+    env1$spectrum.key <- env1$spectrum.key + 1L
+    env1$spectrum <- TRUE
   }
 }
 environment(group) <- env1
@@ -334,7 +348,44 @@ aa <- function(name, attrs, ...) { #handler function
 }
 environment(aa) <- env1
 
-note <- function(x, ...) { #branches function
+trace <- function(x, ...) { #branch function
+  # Extend spectra.dt if needed:
+  if (env1$spectra.dt.key < env1$spectrum.key) {
+    spectra2.dt <- data.table("id"=rep("", 1000), "label"=rep("",1000), "mh"=rep(0, 1000), "charge"=rep(0L, 1000), "num.values"=rep(0L,1000), "Xdata"=rep("",1000), "Xunit"=rep("",1000), "Ydata"=rep("",1000), "Yunit"=rep("",1000) )
+    env1$spectra.dt   <- rbindlist(list(env1$spectra.dt, spectra2.dt))
+    env1$spectra.dt.key <- env1$spectra.dt.key + 1000L
+  }
+  if ( env1$spectrum ){
+    children <- xmlChildren(x)
+    
+    # The following loop allows us to get 'M+H' and "charge"
+    for(i in 1:length(children[ names(children) == "GAML:attribute" ]) ){
+      node <- children[names(children) == "GAML:attribute" ][[i]]
+      assign( xmlGetAttr(node, "type"), xmlValue(node) )
+    }
+
+    num.values <- as.integer(xmlGetAttr(children$`GAML:Xdata`[['GAML:values']],
+                                        "numvalues"))
+    Xdata <- as.character(xmlValue(children$`GAML:Xdata`[['GAML:values']]))
+    Xunit <- as.character(xmlGetAttr(children$`GAML:Xdata`, "units"))
+    Ydata <- as.character(xmlValue(children$`GAML:Ydata`[['GAML:values']]))
+    Yunit <- as.character(xmlGetAttr(children$`GAML:Ydata`, "units"))
+    
+    
+    set( env1$spectra.dt, env1$spectrum.key, 1L, as.character(xmlAttrs(x)['id']) )
+    set( env1$spectra.dt, env1$spectrum.key, 2L, as.character(xmlAttrs(x)['label']) )
+    set( env1$spectra.dt, env1$spectrum.key, 3L, as.numeric(`M+H`) )
+    set( env1$spectra.dt, env1$spectrum.key, 4L, as.integer(`charge`) )
+    set( env1$spectra.dt, env1$spectrum.key, 5L, as.integer(num.values) )
+    set( env1$spectra.dt, env1$spectrum.key, 6L, Xdata )
+    set( env1$spectra.dt, env1$spectrum.key, 7L, Xunit )
+    set( env1$spectra.dt, env1$spectrum.key, 8L, Ydata )
+    set( env1$spectra.dt, env1$spectrum.key, 9L, Yunit )
+  }
+}
+environment(trace) <- env1
+
+note <- function(x, ...) { #branch function
   label <- as.character(xmlAttrs(x)['label'])
   value <- as.character(xmlValue(x))
 
@@ -348,7 +399,6 @@ note <- function(x, ...) { #branches function
   if (env1$perform.params) {
     if( ! is.na(charmatch('list path, sequence source #', label))) {
       label <- 'list path, sequence source'}
-
     switch(label,
            'list path, sequence source' = {
              env1$results@sequence.source.paths <-
@@ -414,7 +464,7 @@ note <- function(x, ...) { #branches function
 environment(note) <- env1
 
 
-xmlEventParse(xml.file, handlers=list(group=group, protein=protein, file=file, domain=domain, aa=aa, text=text, endElement=endElement), branches=list(note=note))
+xmlEventParse(xml.file, handlers=list(group=group, protein=protein, file=file, domain=domain, aa=aa, text=text, endElement=endElement), branches=list(note=note, "GAML:trace"=trace))
 
 # Removing empty rows from prot.dt, pep.dt and ptm.dt
 env1$prot.dt <- subset(env1$prot.dt, uid != 0L)
@@ -427,6 +477,9 @@ setkey(env1$pep.dt, prot.uid)
 env1$ptm.dt <- subset(env1$ptm.dt, at != 0L)
 setkey(env1$ptm.dt, pep.id)
 
+env1$spectra.dt <- subset(env1$spectra.dt, charge != 0L)
+setkey(env1$spectra.dt, id)
+
 num.peptides.values <- lapply(env1$prot.dt[,uid], function(x){
   nrow(subset(env1$pep.dt, prot.uid==x, select=prot.uid))})
 for(i in 1:nrow(env1$prot.dt)){set(env1$prot.dt, i, 7L, num.peptides.values[[i]])}
@@ -434,6 +487,7 @@ for(i in 1:nrow(env1$prot.dt)){set(env1$prot.dt, i, 7L, num.peptides.values[[i]]
 env1$results@proteins <- env1$prot.dt
 env1$results@peptides <- env1$pep.dt
 env1$results@ptm      <- env1$ptm.dt
+env1$results@spectra  <- env1$spectra.dt
 
 return(env1$results)
 }

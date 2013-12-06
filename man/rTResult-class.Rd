@@ -2,16 +2,19 @@
 \Rdversion{1.1}
 \docType{class}
 \alias{rTResult-class}
+\alias{rTResult_s-class}
 
-\title{Class \code{"rTResult"}}
+\title{Class "rTResult" and "rTResult_s" }
 
 \description{
   A rTResult object is designed to contain the information of a X!Tandem
-  analysis and allow data mining of this information. 
+  analysis and allow data mining of this information. rTResult_s is a
+  sub-class that adds a data.table slot for holding spectra. 
 }
 
 \section{Objects from the Class}{
-Objects can be created by calls of the form \code{new("rTResult", ...)}.
+Objects can be created by calls to \code{new("rTResult", ...)}
+or \code{new("rTResult_s", ...)}.
 }
 
 \section{Slots}{
@@ -20,6 +23,7 @@ Objects can be created by calls of the form \code{new("rTResult", ...)}.
     \item{\code{proteins}:}{Object of class \code{"data.table"} ~~ }
     \item{\code{peptides}:}{Object of class \code{"data.table"} ~~ }
     \item{\code{ptm}:}{Object of class \code{"data.table"} ~~ }
+    \item{\code{spectra}:}{Object of class \code{"data.table"} ~~ }
     \item{\code{used.parameters}:}{Object of class \code{"data.frame"} ~~ }
     \item{\code{unused.parameters}:}{Object of class \code{"vector"} ~~ }
     \item{\code{sequence.source.paths}:}{Object of class \code{"vector"} ~~ }
