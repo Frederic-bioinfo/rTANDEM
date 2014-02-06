@@ -443,7 +443,7 @@ SEXP tandem(SEXP param, SEXP peptide, SEXP saps, SEXP mods, SEXP spectrum) // rT
 		if(a > 0 && wait == WAIT_TIMEOUT)	{
 			if(a == 1)	{
 //				cout << "waiting for " << a+1;
-				Rprintf("waiting for %lu", a+1);
+			  Rprintf("waiting for %lu",(unsigned long) a+1);
 			}
 			else	{
 //				cout << a+1;
@@ -476,7 +476,7 @@ SEXP tandem(SEXP param, SEXP peptide, SEXP saps, SEXP mods, SEXP spectrum) // rT
 			}
 			if(a == 1)	{
 //				cout << "waiting for " << a+1;
-				Rprintf("waiting for %lu", a+1);
+			  Rprintf("waiting for %lu", (unsigned long)a+1);
 			}
 			else if(a == 0)	{
 //				cout << "\n\t";
@@ -485,7 +485,7 @@ SEXP tandem(SEXP param, SEXP peptide, SEXP saps, SEXP mods, SEXP spectrum) // rT
 			}
 			else	{
 //				cout << a+1;
-				Rprintf("%lu", a+1);
+			  Rprintf("%lu", (unsigned long)a+1);
 			}
 		}
 		a++;
@@ -512,7 +512,7 @@ SEXP tandem(SEXP param, SEXP peptide, SEXP saps, SEXP mods, SEXP spectrum) // rT
 	}
 #endif
 //	cout << "\tsequences modelled = "<< (long)(pProcess[0]->get_protein_count()/1000.0 + 0.5) << " ks\n";
-	Rprintf("\tsequences modelled = %ld ks\n", (long)(pProcess[0]->get_protein_count()/1000.0 + 0.5));
+	Rprintf("\n\t\tsequences modelled = %lu ks\n", (long)(pProcess[0]->get_protein_count()/1000.0 + 0.5));
 	//cout.flush();
 	pProcess[0]->merge_spectra();
 	a = 1;

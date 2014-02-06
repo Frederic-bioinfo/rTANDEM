@@ -364,7 +364,7 @@ protected:
 	friend class mtermmods;
 	friend class mpam;
 
-protected:
+public:
 	string m_strLastMods;
 	int m_iCurrentRound;
 	bool m_bPermute;

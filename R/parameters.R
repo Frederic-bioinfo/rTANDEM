@@ -91,7 +91,7 @@ rTParam <- function() {
                       "spectrum, use noise suppression" = NA,
                       "spectrum, use contrast angle" = NA,
 
-### This list the parameters that are not officially supported in the API, but are listed as implemented in the TPP documentation.                               
+### This lists the parameters that are not officially supported in the API, but are listed as implemented in the TPP documentation.                               
                       "output, http" = NA,
                       "output, sort best scores by" = NA,
                       "output, title" = NA,
@@ -108,6 +108,26 @@ rTParam <- function() {
                       "spectrum, homolog error" = NA,
                       "spectrum, maximum parent charge" = NA,
                       "spectrum, use conditioning" = NA,
+
+### This lists the parameters associated with PTMTreeSearch
+                      "refine, PTMTreeSearch" = NA,
+                      "refine, PTMTreeSearch modif file" = NA,
+                      "refine, PTMTreeSearch resid modif file" = NA, 
+                      "refine, PTMTreeSearch uniprot modif file" = NA, 
+                      "refine, PTMTreeSearch unimod modif file" = NA,
+                      "refine, PTMTreeSearch mass lower bound" = NA, 
+                      "refine, PTMTreeSearch mass upper bound" = NA,
+                      "refine, PTMTreeSearch keep fixed modifications" = NA,
+                      "refine, PTMTreeSearch 1r ptm bound" = NA,
+                      "refine, PTMTreeSearch 1r NPM" = NA, 
+                      "refine, PTMTreeSearch 1r SR" = NA,
+                      "refine, PTMTreeSearch 1r MPE" = NA, 
+                      "refine, PTMTreeSearch 1r min eval" = NA, 
+                      "refine, PTMTreeSearch 2r" = NA, 
+                      "refine, PTMTreeSearch 2r ptm bound" = NA,
+                      "refine, PTMTreeSearch 2r no NPM limit" = NA, 
+                      "refine, PTMTreeSearch 2r SR" = NA,
+                      "refine, PTMTreeSearch 2r MPE" = NA,
                       check.names=FALSE
                       )
   class(rTParam)<-c("data.frame", "rTParam")
@@ -197,6 +217,42 @@ setParamOrbitrap <- function(param=NULL) {
     "spectrum", "parent monoisotopic mass error minus", 20,
     "spectrum", "parent monoisotopic mass error units", "ppm",
     "spectrum", "parent monoisotopic mass isotope error", "yes" ) )
+
+  for( i in 1:nrow(myValues) ){
+    param <- setParamValue(param, myValues[[i,1]], myValues[[i,2]], myValues[[i,3]])
+  }
+  return(param)
+}
+
+setParamPTMTreeSearch <- function(param=NULL) {
+  # Sets PTMTreeSearch related parameters to default values
+  # Args:
+  #    param: an optional rTParam object to be modified
+  # Return:
+  #    A rTParam object with PTMTreeSearch related parameters
+  #    set to sensible default values. 
+
+  param <- .checkParam(param)
+  xls.path <- system.file("extdata/tandem-style.xsl",package='rTANDEM')
+  myValues <- matrix(ncol=3, byrow=TRUE, data=list(
+    "scoring", "algorithm", "ptmtreesearch-score",
+    "spectrum", "threads", 1,
+    "refine", "PTMTreeSearch", "yes",
+    "refine", "PTMTreeSearch uniprot modif file",
+       system.file("extdata/ptmlist.txt", package="rTANDEM"),
+    "refine", "PTMTreeSearch mass lower bound", 50,
+    "refine", "PTMTreeSearch mass upper bound", 200,
+    "refine", "PTMTreeSearch keep fixed modifications", "no",
+    "refine", "PTMTreeSearch 1r ptm bound", 1,
+    "refine", "PTMTreeSearch 1r NPM", "yes",
+    "refine", "PTMTreeSearch 1r SR", 0.4,
+    "refine", "PTMTreeSearch 1r MPE", 0.99,
+    "refine", "PTMTreeSearch 1r min eval", -3.0,
+    "refine", "PTMTreeSearch 2r", "yes",
+    "refine", "PTMTreeSearch 2r ptm bound", 1,
+    "refine", "PTMTreeSearch 2r no NPM limit", 1000,
+    "refine", "PTMTreeSearch 2r SR", 0.30,
+    "refine", "PTMTreeSearch 2r MPE", 0.00 ) )
 
   for( i in 1:nrow(myValues) ){
     param <- setParamValue(param, myValues[[i,1]], myValues[[i,2]], myValues[[i,3]])

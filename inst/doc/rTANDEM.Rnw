@@ -5,10 +5,8 @@
 \usepackage{hyperref}
 \usepackage{url}
 \usepackage{color, pdfcolmk}
-\usepackage[authoryear,round]{natbib}
+\usepackage[super,square]{natbib}
 \bibliographystyle{plainnat}
-
-
 \newcommand{\scscst}{\scriptscriptstyle}
 \newcommand{\scst}{\scriptstyle}
 
@@ -34,7 +32,7 @@ This package and the underlying X!Tandem code are distributed under the Artistic
 
 \section{Introduction}
 
-X!Tandem is an open source software for protein identification by tandem mass spectrometry, and rTANDEM encapsulates this software in R. rTANDEM provides basic encapsulation of X!Tandem: it has a function that takes as an argument the path to an X!Tandem style parameter file and return the path to an X!tandem style output file. The package also presents functions to transform parameters or results files into R objects and vice versa. Some functions are also available to examine the results within R. An associated package, shinyTANDEM, provides a graphical interface to visualize results objects.
+X!Tandem\citep{beavis2003, beavis2004} is an open source software for protein identification by tandem mass spectrometry, and rTANDEM encapsulates this software in R. rTANDEM provides basic encapsulation of X!Tandem: it has a function that takes as an argument the path to an X!Tandem style parameter file and return the path to an X!tandem style output file. The package also presents functions to transform parameters or results files into R objects and vice versa. Some functions are also available to examine the results within R. An associated package, shinyTANDEM, provides a graphical interface to visualize results objects.
 
 \section{rTANDEM input/output overview}
 
@@ -65,7 +63,7 @@ The taxonomy file, or object, is used to link together a taxon and one or multip
 
 \subsection{The database files}
 
-The database files contain the information that will be used to analyse the spectra files. The most common database files contain the protein sequences of a given taxon in ASCII '.fasta' format. X!Tandem also support the binary 'fasta.pro' format. (See \url{http://www.thegpm.org/TANDEM/api/fastapro.html}.) Lists of saps (single amino acid polymorphisms) or posttranslational modifications can also be used to complement the fasta files. 
+The database files contain the information that will be used to analyse the spectra files. The most common database files contain the protein sequences of a given taxon in ASCII '.fasta' format. X!Tandem also support the binary 'fasta.pro' format. (See \url{http://www.thegpm.org/TANDEM/api/fastapro.html}.) Lists of SAPs (single amino acid polymorphisms) or PTMs (post translational modifications) can also be used to complement the fasta files. 
 
 \subsection{The default-parameter file}
 
@@ -75,7 +73,7 @@ The default-parameter file also provides links to formatting files (css and xsl)
 \subsection{Parameters information}
 The official API for x!tandem parameters is described here: http://thegpm.org/TANDEM/api/
 Some parameters are accepted even though they are not part of the official API. A list of such parameters can be found at: http://tools.proteomecenter.org/wiki/index.php?title=TPP:X!Tandem\_the\_TPP
-The k-score scoring function is now available in rTANDEM. To use this scoring function, set the parameter 'scoring, algorithm' to 'k-score'. 
+The description of some parameters for the PTMTreeSearch scoring function can be found at http://net.icgeb.org/ptmtreesearch/doc/ptmtreesearch\_help.htm 
 
 \section{Dealing with parameters in R objects}
 The parameters that can be passed to the TANDEM algorithm are numerous: over a hundred! Dealing with this can be cumbersome, but rTANDEM features some functions to make it easier.\\
@@ -106,6 +104,34 @@ When the default parameter correspond to your need, you can create two parameter
 You now have default parameters with sensible default values for your two instruments. You still need a taxonomy object. Let's say that these days you are working on human and have downloaded a recent version of Uniprot's complete proteome set for Homo sapiens. Your taxonomy object can be created quickly:\begin{tt}taxonomy <- rTTaxo(taxon='human', format='peptide', URL='/path/to/your/fasta/file')\end{tt}. Other taxon can be added to this object later using the \begin{tt}addTaxon\end{tt} function.\\
 Those objects now allow you to use the \begin{tt}rtandem\end{tt} syntax to launch analysis. For example, to analyse data obtained from your 5600, you would use:
 \begin{tt}result <- rtandem('path/to/your/data/file', 'human', taxonomy, 5600.params)\end{tt}
+
+\section{New Scoring functions}
+In 2005, x!tandem has been modified to allow a 'plug-in' approach to refinement (see MacLean et al, 2005). It is thus possible to design new scoring functions for x!tandem. Many such functions have been developped and the following scoring functions are available in rTANDEM: the k-score function, the hrk-score function and the PTMTreeSearch score function. 
+
+\subsection{k-score function}
+The k-score function was implemented by Brendan MacLean\citep{maclean} based on a scoring function described by Keller\citep{keller2005}.\\
+To use the function, set the scoring algorithm to 'k-score' in your parameter object:\\
+\begin{tt}par <- setParamValue(par, 'scoring', 'algorithm', value='k-score')\end{tt}\\
+It is also recommended to disable spectrum conditioning and to set minimum ion count to 1:\\
+\begin{tt}
+  par <- setParamValue(par, 'scoring', 'minimum ion count', value=1)\\
+  par <- setParamValue(par, 'spectrum', 'use conditioning', value='no')
+\end{tt}
+
+\subsection{hrk-score function}
+The hrk-score function, or high-resolution k-score function, was developped by the Trans-Proteomic Pipeline (TPP) team. It is directly based on the k-score functions, but redefine some computations to fully benefit from high resolution data.\\
+To use the function, set the scoring algorithm to 'hrk-score'. It is also recommended to disable spectrum conditioning and to set minimum ion count to 1:
+\begin{tt}
+  par <- setParamValue(par, 'scoring', 'algorithm', value='hrk-score')\\
+  par <- setParamValue(par, 'scoring', 'minimum ion count', value=1)\\
+  par <- setParamValue(par, 'spectrum', 'use conditioning', value='no')
+\end{tt}
+
+\subsection{PTMTreeSearch}
+The PTMTreeSearch function was developped by Attila Kertesz-Farkas. It is described in  Kertesz-Farkas\citep{PTMTS}, and some documentation can be found at \href{http://net.icgeb.org/tandem/ptmtreesearch\_help.htm}{Tandem with PTMTreeSearch website}. 
+Since PTMTreeSearch comprises many parameters, a function is supplied to set them all in a single step:\\
+\begin{tt}param <- setParamPTMTreeSearch(param)\end{tt}\\
+This will set the scoring algorithm to 'ptmtreesearch-score', with sensible default values and use a small list of modifications installed with rTANDEM. You can also use up-to-date modification lists from unimod or uniprot and link to them using the parameters 'refine, PTMTreeSearch uniprot modif file' or 'refine, PTMTreeSearch unimod modif file'. 
 
 \section{rTANDEM typical usage}
 
@@ -190,4 +216,19 @@ getBM(mart=ensembl.mart, filters="ensembl_peptide_id", values="YFR053C",
 getBM(mart=ensembl.mart, filters="ensembl_peptide_id", values="YFR053C", 
       attributes=c("go_id", "name_1006"))
 @
+
+\begin{thebibliography}{9}
+\bibitem{beavis2003}
+  Craig R, Beavis RC \textbf{[2003]} A method for reducing the time required to match protein sequences with tandem mass spectra. \textit{Rapid Commun Mass Spectrom.} 17(20):2310-6.
+\bibitem{beavis2004}
+  Craig R, Beavis RC \textbf{[2004]} TANDEM:matching proteins with tandem mass spectra. \textit{Bioinformatics} 20(9):1466-7.
+\bibitem{PTMTS}
+  Kertesz-Farkas A, Reiz B, Vera R, Myers MP, Pongor S \textbf{[2014]} PTMTreeSearch: a novel two-stage tree-search algorithm with pruning rules for the identification of post-translational modification of proteins in MS/MS spectra. \textit{Bioinformatics}, 30(2):234-41.
+\bibitem{maclean}
+  MacLean B, Eng JK, McIntosh M \textbf{[2006]} General framework for developing and evaluating database scoring algorithms using the TANDEM search engine. \textit{Bioinformatics} 22(22):2830-2.
+\bibitem{keller2005}
+  Keller A, Eng J, Zhang N, Li XJ, Aebersold R \textbf{[2005]} A uniform proteomics MS/MS analysis platform utilizing open XML file formats. \textit{Mol Syst Biol} 1:2005.0017.
+\end{thebibliography}
+
+
 \end{document}

@@ -198,7 +198,8 @@ public:
 //			cout << m_pList[a] << ",";
   		        Rprintf("%ul,",m_pList[a]);
 			a++;
-		}\
+		}
+\
 //		cout << "<br />" << m_ulCount << "<br />";
 		Rprintf("<br />%ul<br />", m_ulCount);
 //		cout.flush();

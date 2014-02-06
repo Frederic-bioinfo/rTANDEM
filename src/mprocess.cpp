@@ -1789,7 +1789,7 @@ bool mprocess::process(void)
 			lTics++;
 			if(lTics == 50)	{
 //				cout << " | " << (unsigned long)m_tProteinCount/1000 << " ks \n";
-				Rprintf(" | %l ks \n", (unsigned long)m_tProteinCount/1000l);
+				Rprintf(" | %lu ks \n", (unsigned long)m_tProteinCount/1000l);
 				//cout.flush();
 				m_prcLog.log(".");
 				lTics = 0;

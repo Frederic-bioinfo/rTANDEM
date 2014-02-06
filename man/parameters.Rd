@@ -2,6 +2,7 @@
 \alias{rTParam}
 \alias{setParamValue}
 \alias{setParamDefault}
+\alias{setParamPTMTreeSearch}
 \alias{setParamOrbitrap}
 \alias{setParamIonTrap}
 \alias{setParamQuadTof05da}
@@ -15,12 +16,15 @@ Creates and manipulates parameter objects for rTANDEM
 \description{
 Those functions instantiate parameter objects for rTANDEM and
 manipulate their values. Many of those functions give default values,
-either for general settings or for instrument specific settings.
+either for general settings (e.g. setParamDefault), for instrument
+specific settings (e.g. setParamOrbitrap), or for
+function specific settings (e.g. setParamPTMTreeSearch).
 }
 \usage{
 rTParam()
 setParamValue(param, category, parameter=NULL, value)
 setParamDefault(param=NULL)
+setParamPTMTreeSearch(param=NULL)
 setParamOrbitrap(param=NULL)
 setParamIonTrap(param=NULL)
 setParamQuadTof05da(param=NULL)
@@ -37,7 +41,7 @@ addTaxon(taxonomy=NULL, taxon, format="peptide", URL)
     A parameter object of class rTParam.
   }
   \item{...}{
-    Further arguments passed to of from other methods.
+    Further arguments passed to or from other methods.
   }
   \item{category}{
     A string representing a category of parameters (e.g. "output",

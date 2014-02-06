@@ -144,7 +144,7 @@ The End
 class maa
 {
 public:
-	maa(void) { m_cRes = '\0'; m_lPos = 0; m_dMod = 0.0; m_cMut = '\0'; m_dPrompt = 0.0; m_strId.clear();}
+	maa(void) { m_cRes = '\0'; m_lPos = 0; m_dMod = 0.0; m_cMut = '\0'; m_dPrompt = 0.0; m_strId.clear(); m_fPval = 0.0; m_dRatio = 0.0; m_dMatch = 0.0; m_dPos = 0.0;}
 	virtual ~maa(void) { }
 
 	unsigned int m_lPos; // the sequence position of the residue (N-terminal = 0)
@@ -153,6 +153,11 @@ public:
 	char m_cMut; // single letter abbreviation for a discovered point mutation
 	string m_strId; // character string representing an external accession number for a mutation/modification
 	float m_dPrompt; // prompt loss from modification mass
+	double m_fPval;
+	double m_dRatio;
+	double m_dMatch;
+	double m_dPos;
+
 /*
  * simple copy operation, using the = operator
  */
@@ -163,6 +168,11 @@ public:
 		m_cMut = rhs.m_cMut;
 		m_dPrompt = rhs.m_dPrompt;
 		m_strId = rhs.m_strId;
+		m_fPval = rhs.m_fPval;
+		m_dRatio = rhs.m_dRatio;		
+		m_dMatch = rhs.m_dMatch;
+		m_dPos = rhs.m_dPos;
+
 		return *this;
 	}
 };
