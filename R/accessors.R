@@ -27,13 +27,15 @@ GetPeptides <- function(protein.uid, results, expect=1, score=0){
   # Return:
   #    A data.table of the peptides meeting the criteria and their ptm.
 
-  ## Dummy declaration to prevent "no visible binding" when using data.table subset:
-  prot.uid=NULL
-  rm(prot.uid)
+  ## Dummy declaration to prevent "no visible binding" warning with data.table subset:
+  prot.uid=NULL; rm(prot.uid)
 
-  setnames(results@ptm, c("type", "at", "modified"), c("ptm.type", "ptm.at", "ptm.modified"))
+  ptms <- results@ptm
   peps <- subset(results@peptides, prot.uid==protein.uid)
-  return(merge(peps, results@ptm, all.x=TRUE, all.y=FALSE, by="pep.id"))
+  peps.with.ptm <- merge(peps, ptms, all.x=TRUE, all.y=FALSE, by="pep.id")
+  setnames(peps.with.ptm, c("type", "at", "modified"),
+           c("ptm.type", "ptm.at", "ptm.modified"))
+  return(peps.with.ptm)
 }
 
 GetDegeneracy <- function(peptide.id, results){
@@ -45,9 +47,8 @@ GetDegeneracy <- function(peptide.id, results){
   # Return:
   #    A data.table of the proteins where the sequence of the given peptide is present.
 
-  ## Dummy declaration to prevent "no visible binding" note when using data.table subset:
-  pep.id=prot.uid=uid=NULL
-  rm(pep.id, prot.uid, uid)
+  ## Dummy declaration to prevent "no visible binding" note with data.table subset:
+  pep.id=prot.uid=uid=NULL; rm(pep.id, prot.uid, uid)
   
   target.seq <- results@peptides[pep.id==peptide.id]$sequence
   prots <- subset(results@peptides, sequence==target.seq, select=prot.uid)

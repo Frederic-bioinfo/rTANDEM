@@ -150,10 +150,14 @@ float PTMTreeSearchScore::score(const size_t _i){
 /*
  * return -1000.0 if there is no sequence available
  */
-	if(m_pSeq == NULL)
+	if(m_pSeq == NULL){
 		return -1000.0;
+	}
 
 	if (m_lSeqLength < 2){
+		return -10000.0;
+	}
+	if (m_lSeqLength > 100){
 		return -10000.0;
 	}
 	prescore(_i);	
@@ -613,6 +617,7 @@ float PTMTreeSearchScore::score(const size_t _i){
 		delete m_vSpectraEqualS;
 		delete m_dAllMatch;
 		delete m_dBestScore;
+		delete m_uiSpectrumID;
 	} //END 	if (m_CurrentSpectra == 0){
 
 	m_pBestGoal = m_BestGoal[m_CurrentSpectra];
