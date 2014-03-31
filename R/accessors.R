@@ -54,3 +54,8 @@ GetDegeneracy <- function(peptide.id, results){
   prots <- subset(results@peptides, sequence==target.seq, select=prot.uid)
   return(subset(results@proteins, uid %in% prots[[1]]))
 }
+
+## Capitalization aliases
+getProteins <- GetProteins
+getPeptides <- GetPeptides
+getDegeneracy <- GetDegeneracy

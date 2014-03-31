@@ -184,7 +184,8 @@ setParamDefault <-  function(param=NULL) {
     "refine", "use potential modifications for full refinement", "no",
     "refine", "point mutations", "no",
     "output", "sort results by", "protein",
-    "output", "path hashing", "no",
+    "output", "path", "rTANDEM.xml",
+    "output", "path hashing", "yes",
     "output", "xsl path", xls.path,
     "output", "parameters", "yes",
     "output", "performance", "yes",
@@ -391,3 +392,11 @@ print.rTParam <- function(x, ...) {
       cat(paste(names(x)[[i]],": \n\t", x[[i]], "\n\n", sep=""))
     }
 }
+
+## Capitalization aliases
+SetParamValue <- setParamValue
+SetParamDefault <- setParamDefault
+SetParamPTMTreeSearch <- setParamPTMTreeSearch
+SetParamQuadTof100ppm <- setParamQuadTof100ppm
+SetParamIonTrap <- setParamIonTrap
+AddTaxon <- addTaxon

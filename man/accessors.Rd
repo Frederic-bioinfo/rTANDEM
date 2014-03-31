@@ -1,7 +1,10 @@
 \name{accessors}
 \alias{GetProteins}
+\alias{getProteins}
 \alias{GetPeptides}
+\alias{getPeptides}
 \alias{GetDegeneracy}
+\alias{getDegeneracy}
 \title{
 Extract information from rTANDEM result object
 }

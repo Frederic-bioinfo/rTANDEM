@@ -1,4 +1,4 @@
-rtandem <- function (data.file, taxon, taxonomy, default.parameters) {
+rtandem <- function (data.file, taxon, taxonomy, default.parameters, output.path=NA) {
   # Interface to tandem(input). This function createsCreates a basic input file
   #   and launch tandem(input) on this input file.
   # Args:
@@ -14,8 +14,21 @@ rtandem <- function (data.file, taxon, taxonomy, default.parameters) {
   input <- rTParam()
   input$`spectrum, path` <- data.file
   input$`protein, taxon` <- taxon
+
+  ## It is necessary to refer to a file if the taxonomy contains multiple rows
+  ## because multiple rows cannot be assigned to a data.frame cell.
+  ## ToDo: find a more elegant way to handle this.
+  if ( 'rTTaxo' %in% class(taxonomy) & length(taxonomy) > 1) {
+    taxo.path <- tempfile()
+    WriteTaxoToXML(taxonomy, taxo.path)
+    taxonomy <- taxo.path
+  }
   input$`list path, taxonomy information` <- taxonomy
   input$`list path, default parameters`   <- default.parameters
+  if ( ! is.na(output.path) ){
+    input$`output, path` <- output.path
+  }
+  
   tandem(input)
 }
 

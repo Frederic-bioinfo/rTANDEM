@@ -491,3 +491,10 @@ env1$results@spectra  <- env1$spectra.dt
 
 return(env1$results)
 }
+
+## Capitalization aliases
+getTaxoFromXML <- GetTaxoFromXML
+getParamFromXML <- GetParamFromXML
+writeParamToXML <- WriteParamToXML
+writeTaxoToXML <- WriteTaxoToXML
+getResultsFromXML <- GetResultsFromXML

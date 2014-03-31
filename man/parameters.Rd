@@ -1,14 +1,22 @@
 \name{parameters}
 \alias{rTParam}
 \alias{setParamValue}
+\alias{SetParamValue}
 \alias{setParamDefault}
+\alias{SetParamDefault}
 \alias{setParamPTMTreeSearch}
+\alias{SetParamPTMTreeSearch}
 \alias{setParamOrbitrap}
+\alias{SetParamOrbitrap}
 \alias{setParamIonTrap}
+\alias{SetParamIonTrap}
 \alias{setParamQuadTof05da}
+\alias{SetParamQuadTof05da}
 \alias{setParamQuadTof100ppm}
+\alias{SetParamQuadTof100ppm}
 \alias{rTTaxo}
 \alias{addTaxon}
+\alias{AddTaxon}
 \alias{print.rTParam}
 \title{
 Creates and manipulates parameter objects for rTANDEM

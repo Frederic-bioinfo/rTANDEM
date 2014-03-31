@@ -14,7 +14,7 @@
 }
 \usage{
 tandem(input)
-rtandem(data.file, taxon, taxonomy, default.parameters)
+rtandem(data.file, taxon, taxonomy, default.parameters, output.path=NA)
 }
 
 \arguments{
@@ -36,6 +36,11 @@ rtandem(data.file, taxon, taxonomy, default.parameters)
   \item{default.parameters}{
     Either a rTParam object containing the default parameters to be
     used, or the path to a X!Tandem style default-parameters xml file.
+  }
+  \item{output.path}{
+    The path and name of the output file. If this name ends by ".xml"
+    and the option 'path hashing' is enabled, a timestamp will be inserted
+    just before the ".xml". 
   }
 }
 \value{
