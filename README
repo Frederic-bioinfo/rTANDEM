@@ -2,7 +2,11 @@ README
 
 SYSTEM REQUIREMENTS: 
 
-rTANDEM uses 'expat' and 'pthread' libraries. Their avalability might vary according to operating system.
+rTANDEM uses 'expat' and 'pthread' libraries. Their avalability might vary according to operating system. rTANDEM also uses mzParsers from TPP, those parsers rely on zlib.
+
+zlib: 
+zlib is available on linux and OSX.
+On windows, zlib is available through the zlibbioc package.
 
 expat:
 The expat library should be available on OSX since 10.4.

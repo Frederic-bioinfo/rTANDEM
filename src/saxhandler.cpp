@@ -128,6 +128,8 @@ MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 The End 
 */
 
+#include "mzParser.h"
+
 #include "stdafx.h"
 #include "saxhandler.h"
 #include "base64.h"
@@ -138,13 +140,14 @@ The End
 #endif
 
 
+#ifndef _WIN32   ////added for rTANDEM for compiliation under mingw
 #ifdef GCC
 #include <netinet/in.h>  ////Pour linux
 #endif
-
 #ifdef GCC4
 #include <netinet/in.h>  ////Pour linux gcc v. 4
 #endif
+#endif //// end if win32
 
 #ifdef OSX
 #include <sys/types.h>  ////Pour mac
@@ -597,4 +600,213 @@ void SAXSpectraHandler::setDescription()
 	sprintf(buffer, "%d", (int)m_specCurrent.m_fZ);
 	m_specCurrent.m_strDescription += buffer;
 	m_specCurrent.m_strDescription += ")";
+}
+
+// Static callback handlers
+static void mzp_startElementCallback(void *data, const XML_Char *el, const XML_Char **attr)
+{
+	((mzpSAXHandler*) data)->startElement(el, attr);
+}
+
+static void mzp_endElementCallback(void *data, const XML_Char *el)
+{
+	((mzpSAXHandler*) data)->endElement(el);
+}
+
+static void mzp_charactersCallback(void *data, const XML_Char *s, int len)
+{
+	((mzpSAXHandler*) data)->characters(s, len);
+}
+
+mzpSAXHandler::mzpSAXHandler()
+{
+	fptr = NULL;
+	m_bGZCompression = false;
+	fptr = NULL;
+	m_parser = XML_ParserCreate(NULL);
+	XML_SetUserData(m_parser, this);
+	XML_SetElementHandler(m_parser, mzp_startElementCallback, mzp_endElementCallback);
+	XML_SetCharacterDataHandler(m_parser, mzp_charactersCallback);
+}
+
+
+mzpSAXHandler::~mzpSAXHandler()
+{
+	if(fptr!=NULL) fclose(fptr);
+	fptr = NULL;
+	XML_ParserFree(m_parser);
+}
+
+void mzpSAXHandler::startElement(const XML_Char *el, const XML_Char **attr)
+{
+}
+
+void mzpSAXHandler::endElement(const XML_Char *el)
+{
+}
+
+
+void mzpSAXHandler::characters(const XML_Char *s, int len)
+{
+}
+
+bool mzpSAXHandler::open(const char* fileName){
+	if(fptr!=NULL) fclose(fptr);
+	if(m_bGZCompression) fptr=fopen(fileName,"rb");
+	else fptr=fopen(fileName,"r");
+	if(fptr==NULL){
+		cerr << "Failed to open input file '" << fileName << "'.\n";
+		return false;
+	}
+	setFileName(fileName);
+
+	//Build the index if gz compressed
+	if(m_bGZCompression){
+		gzObj.free_index();
+
+		int len;
+		len = gzObj.build_index(fptr, SPAN);
+    
+		if (len < 0) {
+        fclose(fptr);
+        switch (len) {
+        case Z_MEM_ERROR:
+            fprintf(stderr, "Error reading .gz file: out of memory\n");
+            break;
+        case Z_DATA_ERROR:
+            fprintf(stderr, "Error reading .gz file: compressed data error in %s\n", fileName);
+            break;
+        case Z_ERRNO:
+            fprintf(stderr, "Error reading .gz file: read error on %s\n", fileName);
+            break;
+        default:
+            fprintf(stderr, "Error reading .gz file: error %d while building index\n", len);
+        }
+				fptr=NULL;
+        return false;
+    }
+	}
+
+	return true;
+
+}
+
+bool mzpSAXHandler::parse()
+{
+	if (fptr == NULL){
+		cerr << "Error parse(): No open file." << endl;
+		return false;
+	}
+
+	char buffer[CHUNK];  //CHUNK=16384
+	int readBytes = 0;
+	bool success = true;
+	int chunk=0;
+
+	if(m_bGZCompression){
+		while (success && (readBytes = gzObj.extract(fptr, 0+chunk*CHUNK, (unsigned char*)buffer, CHUNK))>0) {
+			success = (XML_Parse(m_parser, buffer, readBytes, false) != 0);
+			chunk++;
+		}
+	} else {
+		while (success && (readBytes = (int) fread(buffer, 1, sizeof(buffer), fptr)) != 0){
+			success = (XML_Parse(m_parser, buffer, readBytes, false) != 0);
+		}
+	}
+	success = success && (XML_Parse(m_parser, buffer, 0, true) != 0);
+
+	if (!success)
+	{
+		XML_Error error = XML_GetErrorCode(m_parser);
+
+		cerr << m_strFileName
+			<< "(" << XML_GetCurrentLineNumber(m_parser) << ")"
+			<< " : error " << (int) error << ": ";
+
+		switch (error)
+		{
+			case XML_ERROR_SYNTAX:
+			case XML_ERROR_INVALID_TOKEN:
+			case XML_ERROR_UNCLOSED_TOKEN:
+				cerr << "Syntax error parsing XML.";
+				break;
+
+			// TODO: Add more descriptive text for interesting errors.
+
+			default:
+				cerr << "XML Parsing error.";
+				break;
+		} 
+		cerr << "\n";
+		return false;
+	}
+	return true;
+}
+
+//This function operates similarly to the parse() function.
+//However, it accepts a file offset to begin parsing at a specific point.
+//The parser will halt file reading when stop flag is triggered.
+bool mzpSAXHandler::parseOffset(f_off offset){
+
+	if (fptr == NULL){
+		cerr << "Error parseOffset(): No open file." << endl;
+		return false;
+	}
+	char buffer[CHUNK]; //CHUNK=16384
+	int readBytes = 0;
+	bool success = true;
+	int chunk=0;
+	
+	XML_ParserReset(m_parser,"ISO-8859-1");
+	XML_SetUserData(m_parser, this);
+	XML_SetElementHandler(m_parser, mzp_startElementCallback, mzp_endElementCallback);
+	XML_SetCharacterDataHandler(m_parser, mzp_charactersCallback);
+
+	mzpfseek(fptr,offset,SEEK_SET);
+	m_bStopParse=false;
+
+	if(m_bGZCompression){
+		while (success && (readBytes = gzObj.extract(fptr, offset+chunk*CHUNK, (unsigned char*)buffer, CHUNK))>0) {
+			success = (XML_Parse(m_parser, buffer, readBytes, false) != 0);
+			chunk++;
+			if(m_bStopParse) break;
+		}
+	} else {
+		while (success && (readBytes = (int) fread(buffer, 1, sizeof(buffer), fptr)) != 0) {
+			success = (XML_Parse(m_parser, buffer, readBytes, false) != 0);
+			if(m_bStopParse) break;
+		}
+	}
+
+	if (!success && !m_bStopParse)
+	{
+		XML_Error error = XML_GetErrorCode(m_parser);
+
+		cerr << m_strFileName
+			<< "(" << XML_GetCurrentLineNumber(m_parser) << ")"
+			<< " : error " << (int) error << ": ";
+
+		switch (error)
+		{
+			case XML_ERROR_SYNTAX:
+			case XML_ERROR_INVALID_TOKEN:
+			case XML_ERROR_UNCLOSED_TOKEN:
+				cerr << "Syntax error parsing XML." << endl;
+				break;
+
+			// TODO: Add more descriptive text for interesting errors.
+
+			default:
+				cerr << "Spectrum XML Parsing error:\n";
+				cerr << XML_ErrorString(error) << endl;
+				break;
+		} 
+		exit(-7);
+		return false;
+	}
+	return true;
+}
+
+void mzpSAXHandler::setGZCompression(bool b){
+	m_bGZCompression=b;
 }
