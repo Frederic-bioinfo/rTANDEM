@@ -165,7 +165,7 @@ The End
 #include "xmltaxonomy.h"
 #include "mbiomlreport.h"
 #include "mrefine.h"
-#include "loadmzparser.h"
+
 // #define TANDEM_EXACT 1
 
 /*
@@ -3954,20 +3954,6 @@ bool mprocess::spectra()
 		}
 	}
 #ifdef XMLCLASS
-
-/*MH: Intercept loading of mzParser supported formats (mzXML, mzML, etc...)*/
-    if(bContinue) {
-      loadmzparser ldMzParser(m_vSpectra, m_specCondition, *m_pScore);
-      if(ldMzParser.open(strValue)){
-	//  cout << " (mzParser).";
-	Rprintf(" (mzParser).");
-        ldMzParser.get();
-        m_tSpectraTotal = m_vSpectra.size();
-        bContinue = false;
-      }
-    }
-
-
   /*
    * if no PKl format data was found, test for mzxml format information
    * Celui ci sera different des autres.

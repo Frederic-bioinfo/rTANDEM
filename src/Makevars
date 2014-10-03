@@ -1,8 +1,5 @@
 ## Use the R_HOME indirection to support installations of multiple R version
-PKG_LIBS = `$(R_HOME)/bin/Rscript -e "Rcpp:::LdFlags()"` -lpthread -lexpat -lz
-
-## For compiling mzParzer:
-PKG_CXXFLAGS = -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -DGCC
+PKG_LIBS = `$(R_HOME)/bin/Rscript -e "Rcpp:::LdFlags()"` -lpthread -lexpat
 
 ## As an alternative, one can also add this code in a file 'configure'
 ##
@@ -26,4 +23,5 @@ PKG_CXXFLAGS = -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -DGCC
 ## Of course, autoconf can also be used to write configure files. This is
 ## done by a number of packages, but recommended only for more advanced users
 ## comfortable with autoconf and its related tools.
+
 

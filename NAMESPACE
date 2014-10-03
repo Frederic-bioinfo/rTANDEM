@@ -1,3 +1,2 @@
 useDynLib(rTANDEM)
 exportPattern("^[[:alpha:]]+")
-import(zlibbioc)
