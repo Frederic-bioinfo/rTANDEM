@@ -26,10 +26,10 @@ int checkFileType(const char* fname){
 	if(!strcmp(ext,"GZ")) {
 		if(!strcmp(preExt,"MZML")) return 3;
 		if(!strcmp(preExt,"MZXML")) return 4;
-		cerr << "Unknown .gz file. Only .mzML.gz and .mzXML.gz allowed. No file loaded." << endl;
+		Rprintf("Unknown .gz file. Only .mzML.gz and .mzXML.gz allowed. No file loaded.\n");
 		return 0;
 	}
-	cerr << "Unknown file type. No file loaded." << endl;
+	Rprintf("Unknown file type. No file loaded.\n");
 	return 0;
 }
 
@@ -51,7 +51,7 @@ ramp_fileoffset_t getIndexOffset(RAMPFILE *pFI){
 InstrumentStruct* getInstrumentStruct(RAMPFILE *pFI){
 	InstrumentStruct* r=(InstrumentStruct *) calloc(1,sizeof(InstrumentStruct));
 	if(r==NULL) {
-    printf("Cannot allocate memory\n");
+    Rprintf("Cannot allocate memory\n");
     return NULL;
   } else {
 		strcpy(r->analyzer,"UNKNOWN");
@@ -267,10 +267,10 @@ char* rampValidFileType(const char *buf){
 	if(!strcmp(ext,".GZ")) {
 		if(!strcmp(preExt,".MZML.GZ")) return (char*) result2;
 		if(!strcmp(preExt,".MZXML.GZ")) return (char*) result2;
-		cout << "Unknown .gz file. Only .mzML.gz and .mzXML.gz allowed. No file loaded." << endl;
+		Rprintf("Unknown .gz file. Only .mzML.gz and .mzXML.gz allowed. No file loaded.\n");
 	}
 	if(!strcmp(ext,".MZDATA")) {
-		cout << ".mzData is not supported. Please convert to mz5, mzXML, or mzML." << endl;
+	  Rprintf(".mzData is not supported. Please convert to mz5, mzXML, or mzML.\n");
 	}
 	result=NULL;
 	return (char*) result;
@@ -861,40 +861,40 @@ void shiftScanCache(struct ScanCacheStruct* cache, int nScans) {
 // DEAD FUNCTIONS
 //--------------------------------------------------
 int isScanAveraged(struct ScanHeaderStruct *scanHeader){
-	cerr << "call to unsupported function: isScanAveraged(struct ScanHeaderStruct *scanHeader)" << endl;
-	return 0;
+  Rprintf("call to unsupported function: isScanAveraged(struct ScanHeaderStruct *scanHeader)\n");
+  return 0;
 }
 
 int isScanMergedResult(struct ScanHeaderStruct *scanHeader){
-	cerr << "call to unsupported function: isScanMergedResult(struct ScanHeaderStruct *scanHeader)" << endl;
+  Rprintf("call to unsupported function: isScanMergedResult(struct ScanHeaderStruct *scanHeader)\n");
 	return 0;
 }
 
 int rampSelfTest(char *filename){
-	cerr << "call to unsupported function: rampSelfTest(char *filename)" << endl;
+  Rprintf("call to unsupported function: rampSelfTest(char *filename)\n");
 	return 0;
 }
 
 char* rampTrimBaseName(char *buf){
-	cerr << "call to unsupported function: rampTrimBaseName(char *buf)" << endl;
-	return buf;
+  Rprintf("call to unsupported function: rampTrimBaseName(char *buf)\n");
+  return buf;
 }
 
 int rampValidateOrDeriveInputFilename(char *inbuf, int inbuflen, char *spectrumName){
-	cerr << "call to unsupported function: rampValidateOrDeriveInputFilename(char *inbuf, int inbuflen, char *spectrumName)" << endl;
-	return 0;
+  Rprintf("call to unsupported function: rampValidateOrDeriveInputFilename(char *inbuf, int inbuflen, char *spectrumName)\n");
+  return 0;
 }
 
 double readStartMz(RAMPFILE *pFI, ramp_fileoffset_t lScanIndex){
-	cerr << "call to unsupported function: readStartMz(RAMPFILE *pFI, ramp_fileoffset_t lScanIndex)" << endl;
+  Rprintf("call to unsupported function: readStartMz(RAMPFILE *pFI, ramp_fileoffset_t lScanIndex)\n");
 	return 0.0;
 }
 
 double readEndMz(RAMPFILE *pFI, ramp_fileoffset_t lScanIndex){
-	cerr << "call to unsupported function: readEndMz(RAMPFILE *pFI, ramp_fileoffset_t lScanIndex)" << endl;
+  Rprintf("call to unsupported function: readEndMz(RAMPFILE *pFI, ramp_fileoffset_t lScanIndex)\n");
 	return 0.0;
 }
 
 void setRampOption(long option){
-	cerr << "call to unsupported function: setRampOption(long option)" << endl;
+  Rprintf("call to unsupported function: setRampOption(long option)\n");
 }

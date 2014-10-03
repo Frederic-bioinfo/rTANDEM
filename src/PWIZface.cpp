@@ -9,7 +9,7 @@ Chromatogram::~Chromatogram(){
 }
 
 void Chromatogram::getTimeIntensityPairs(vector<TimeIntensityPair>& v){
-	if(bc==NULL) cerr << "Null chromatogram" << endl;
+  if(bc==NULL) Rprintf("Null chromatogram\n");
 	else v=bc->getData();
 }
 
@@ -63,8 +63,8 @@ bool ChromatogramList::get() {
 
 unsigned int ChromatogramList::size() {
 	if(vChromatIndex==NULL) {
-		cerr << "Get chromatogram list first." << endl;
-		return 0;
+	  Rprintf("Get chromatogram list first.\n");
+	  return 0;
 	}
 	if(mzML!=NULL) return vChromatIndex->size();
 #ifdef MZP_MZ5
@@ -108,7 +108,7 @@ void PwizRun::set(mzpSAXMzmlHandler* ml, void* m5, BasicChromatogram* b){
 MSDataFile::MSDataFile(string s){
 	int i=checkFileType(&s[0]);
 	if(i==0){
-		cerr << "Cannot identify file type." << endl;
+	  Rprintf("Cannot identify file type.\n");
 	} else {
 		bs = new BasicSpectrum();
 		bc = new BasicChromatogram();
@@ -119,7 +119,7 @@ MSDataFile::MSDataFile(string s){
 				if(i==3) mzML->setGZCompression(true);
 				else mzML->setGZCompression(false);
 				if(!mzML->load(&s[0])){
-					cerr << "Failed to load file." << endl;
+				  Rprintf("Failed to load file.\n");
 					delete mzML;
 					delete bs;
 					delete bc;
@@ -128,25 +128,25 @@ MSDataFile::MSDataFile(string s){
 				break;
 			case 2: //mzXML
 			case 4:
-				cerr << "mzXML not supported in this interface." << endl;
-				delete bs;
-				delete bc;
-				break;
+			  Rprintf("mzXML not supported in this interface.\n");
+			  delete bs;
+			  delete bc;
+			  break;
 #ifdef MZP_MZ5
 			case 5: //mz5
 				mz5Config = new mzpMz5Config();
 				mz5=new mzpMz5Handler(mz5Config, bs, bc);
 				if(!mz5->readFile(&s[0])){
-					cerr << "Failed to load file." << endl;
-					delete mz5;
-					delete mz5Config;
-					delete bs;
-					delete bc;
+				  Rprintf("Failed to load file.\n");
+				  delete mz5;
+				  delete mz5Config;
+				  delete bs;
+				  delete bc;
 				}
 				break;
 #endif
-			default:
-				break;
+		default:
+		  break;
 		}
 #ifdef MZP_MZ5
 		run.set(mzML,mz5,bc);

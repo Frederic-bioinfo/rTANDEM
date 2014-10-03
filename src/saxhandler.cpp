@@ -655,7 +655,7 @@ bool mzpSAXHandler::open(const char* fileName){
 	if(m_bGZCompression) fptr=fopen(fileName,"rb");
 	else fptr=fopen(fileName,"r");
 	if(fptr==NULL){
-		cerr << "Failed to open input file '" << fileName << "'.\n";
+	  Rprintf("Failed to open input file \"%s\".\n", fileName);
 		return false;
 	}
 	setFileName(fileName);
@@ -671,16 +671,16 @@ bool mzpSAXHandler::open(const char* fileName){
         fclose(fptr);
         switch (len) {
         case Z_MEM_ERROR:
-            fprintf(stderr, "Error reading .gz file: out of memory\n");
+	  Rprintf("Error reading .gz file: out of memory\n");
             break;
         case Z_DATA_ERROR:
-            fprintf(stderr, "Error reading .gz file: compressed data error in %s\n", fileName);
+	  Rprintf("Error reading .gz file: compressed data error in %s\n", fileName);
             break;
         case Z_ERRNO:
-            fprintf(stderr, "Error reading .gz file: read error on %s\n", fileName);
+	  Rprintf("Error reading .gz file: read error on %s\n", fileName);
             break;
         default:
-            fprintf(stderr, "Error reading .gz file: error %d while building index\n", len);
+	  Rprintf("Error reading .gz file: error %lu while building index\n", (unsigned long)len);
         }
 				fptr=NULL;
         return false;
@@ -694,7 +694,7 @@ bool mzpSAXHandler::open(const char* fileName){
 bool mzpSAXHandler::parse()
 {
 	if (fptr == NULL){
-		cerr << "Error parse(): No open file." << endl;
+	  Rprintf("Error parse(): No open file.\n");
 		return false;
 	}
 
@@ -718,26 +718,25 @@ bool mzpSAXHandler::parse()
 	if (!success)
 	{
 		XML_Error error = XML_GetErrorCode(m_parser);
-
-		cerr << m_strFileName
-			<< "(" << XML_GetCurrentLineNumber(m_parser) << ")"
-			<< " : error " << (int) error << ": ";
+		Rprintf("%s (", m_strFileName.c_str());
+		Rprintf("%lu)", XML_GetCurrentLineNumber(m_parser));
+		Rprintf(" : error %i :", (int)error );
 
 		switch (error)
 		{
 			case XML_ERROR_SYNTAX:
 			case XML_ERROR_INVALID_TOKEN:
 			case XML_ERROR_UNCLOSED_TOKEN:
-				cerr << "Syntax error parsing XML.";
+			  Rprintf("Syntax error parsing XML.");
 				break;
 
 			// TODO: Add more descriptive text for interesting errors.
 
 			default:
-				cerr << "XML Parsing error.";
-				break;
+			  Rprintf("XML Parsing error.");
+			  break;
 		} 
-		cerr << "\n";
+		Rprintf("\n");
 		return false;
 	}
 	return true;
@@ -749,7 +748,7 @@ bool mzpSAXHandler::parse()
 bool mzpSAXHandler::parseOffset(f_off offset){
 
 	if (fptr == NULL){
-		cerr << "Error parseOffset(): No open file." << endl;
+	  Rprintf("Error parseOffset(): No open file.\n");
 		return false;
 	}
 	char buffer[CHUNK]; //CHUNK=16384
@@ -782,27 +781,27 @@ bool mzpSAXHandler::parseOffset(f_off offset){
 	{
 		XML_Error error = XML_GetErrorCode(m_parser);
 
-		cerr << m_strFileName
-			<< "(" << XML_GetCurrentLineNumber(m_parser) << ")"
-			<< " : error " << (int) error << ": ";
+		Rprintf("%s(", m_strFileName.c_str());
+		Rprintf("%i)", XML_GetCurrentLineNumber(m_parser));
+		Rprintf(" : error %i :", (int)error); 
 
 		switch (error)
 		{
 			case XML_ERROR_SYNTAX:
 			case XML_ERROR_INVALID_TOKEN:
 			case XML_ERROR_UNCLOSED_TOKEN:
-				cerr << "Syntax error parsing XML." << endl;
+			  Rprintf("Syntax error parsing XML.\n");
 				break;
 
 			// TODO: Add more descriptive text for interesting errors.
 
 			default:
-				cerr << "Spectrum XML Parsing error:\n";
-				cerr << XML_ErrorString(error) << endl;
+			  Rprintf("Spectrum XML Parsing error:\n");
+			  Rprintf("%s\n", XML_ErrorString(error));
 				break;
 		} 
-		exit(-7);
-		return false;
+			    //exit(-7);
+			    return(-7);
 	}
 	return true;
 }

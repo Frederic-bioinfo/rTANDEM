@@ -60,7 +60,7 @@ void SAXMzxmlHandler::startElement(const XML_Char *el, const XML_Char **attr)
 		m_bLowPrecision = (strcmp("64", getAttrValue("precision", attr)) != 0);
 		const char *pcompressionType = getAttrValue("compressionType", attr);
 		if(strlen(pcompressionType) != 0 && !strstr(pcompressionType,"none"))	{
-//			cout << "Non-standard CODEC used for mzXML peak data (CODEC type=" << pcompressionType << "): file cannot be interpreted.\n";
+//	cout << "Non-standard CODEC used for mzXML peak data (CODEC type=" << pcompressionType << "): file cannot be interpreted.\n";
 			Rprintf("Non-standard CODEC used for mzXML peak data (CODEC type=%s): file cannot be interpreted.\n", pcompressionType);
 			//exit(-10);
 			return;
@@ -199,8 +199,10 @@ void mzpSAXMzxmlHandler::startElement(const XML_Char *el, const XML_Char **attr)
 		if(!strcmp("zlib",&s[0])) m_bCompressedData=true;
 		else if(!strcmp("none",&s[0])) m_bCompressedData=false;
 		else if(s.length()>0) {
-			cout << "Halting! Unknown compression type: " <<  &s[0] << endl;
-			exit(-5);
+		  Rprintf("Halting! Unknown compression type: %s\n", &s[0]);
+		  //cout << "Halting! Unknown compression type: " <<  &s[0] << endl;
+		  //exit(-5);
+		  return;
 		}
 		s=getAttrValue("compressedLen", attr);
 		if(s.length()>0) m_compressLen = (uLong)atoi(&s[0]);
@@ -302,7 +304,8 @@ void mzpSAXMzxmlHandler::endElement(const XML_Char *el) {
 
 	} else if(isElement("offset",el) && m_bScanIndex){
 		if(!m_bInIndex){ //bad index reference
-			cout << "Index offset points to wrong location. Please rebuild index." << endl;
+		  Rprintf("Index offset points to wrong location. Please rebuild index.\n");
+		  //cout << "Index offset points to wrong location. Please rebuild index." << endl;
 			m_bNoIndex=true;
 			stopParser();
 		}
@@ -341,7 +344,8 @@ bool mzpSAXMzxmlHandler::readHeader(int num){
 	spec->clear();
 
 	if(m_bNoIndex){
-		cout << "Currently only supporting indexed mzXML" << endl;
+	  Rprintf("Currently only supporting indexed mzXML\n");
+	  //cout << "Currently only supporting indexed mzXML" << endl;
 		return false;
 	}
 
@@ -388,7 +392,8 @@ bool mzpSAXMzxmlHandler::readSpectrum(int num){
 	spec->clear();
 
 	if(m_bNoIndex){
-		cout << "Currently only supporting indexed mzXML" << endl;
+	  Rprintf("Currently only supporting indexed mzXML\n");
+	  //cout << "Currently only supporting indexed mzXML" << endl;
 		return false;
 	}
 
@@ -537,9 +542,13 @@ void mzpSAXMzxmlHandler::decode32(){
 		// an additional check of the data file integrity can be performed
 		int length = b64_decode_mio( (char*) pDecoded , (char*) pData, stringSize );
 		if(length != size) {
-			cout << " decoded size " << length << " and required size " << (unsigned long)size << " dont match:\n";
-			cout << " Cause: possible corrupted file.\n";
-			exit(EXIT_FAILURE);
+		  Rprintf(" decoded size $lu and required size ", (unsigned long)length);
+		  Rprintf("%ul dont match:\n", (unsigned long)size);
+		  //cout << " decoded size " << length << " and required size " << (unsigned long)size << " dont match:\n";
+			Rprintf(" Cause: possible corrupted file.\n");
+			//cout << " Cause: possible corrupted file.\n";
+			//exit(EXIT_FAILURE);
+			return;
 		}
 	}
 
@@ -582,9 +591,12 @@ void mzpSAXMzxmlHandler::decode64(){
 		// an additional check of the data file integrity can be performed
 		int length = b64_decode_mio( (char*) pDecoded , (char*) pData, stringSize );
 		if(length != size) {
-			cout << " decoded size " << length << " and required size " << (unsigned long)size << " dont match:\n";
-			cout << " Cause: possible corrupted file.\n";
-			exit(EXIT_FAILURE);
+		  Rprintf(" decoded size %lu and required size", (unsigned long)length);
+		  Rprintf("%lu dont match:\nCause: possible corrupted file.\n", (unsigned long)size);
+		  //			cout << " decoded size " << length << " and required size " << (unsigned long)size << " dont match:\n";
+		  //	cout << " Cause: possible corrupted file.\n";
+		  //exit(EXIT_FAILURE);
+		  return;
 		}
 	}
 
@@ -671,7 +683,7 @@ f_off mzpSAXMzxmlHandler::readIndexOffset() {
 	}
 
 	if(start==NULL || stop==NULL) {
-		cerr << "No index list offset found. File will not be read." << endl;
+	  Rprintf("No index list offset found. File will not be read.\n");
 		return 0;
 	}
 
@@ -692,7 +704,7 @@ bool mzpSAXMzxmlHandler::load(const char* fileName){
 	} else {
 		m_bNoIndex=false;
 		if(!parseOffset(indexOffset)){
-			cerr << "Cannot parse index. Make sure index offset is correct or rebuild index." << endl;
+		  Rprintf("Cannot parse index. Make sure index offset is correct or rebuild index.\n");
 			return false;
 		}
 		posIndex=-1;

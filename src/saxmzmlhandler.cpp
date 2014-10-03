@@ -205,9 +205,9 @@ void SAXMzmlHandler::processCVParam(const char* name, const char* accession, con
 	}
 	else if(!strcmp(name, "zlib compression") || !strcmp(accession,"MS:1000574"))	{
 //		cout << "<br>Fatal error: non-standard CODEC used for mzML peak data (CODEC type=" << name << ").<br>File cannot be interpreted.<br>\n";
-		Rprintf("<br>Fatal error: non-standard CODEC used for mzML peak data (CODEC type=%s).<br>File cannot be interpreted.<br>\n", name);
+	  Rprintf("<br>Fatal error: non-standard CODEC used for mzML peak data (CODEC type=%s).<br>File cannot be interpreted.<br>\n", name);
 		//exit(-10);
-		return;
+	  return;
 	}
 }
 
@@ -653,7 +653,8 @@ bool mzpSAXMzmlHandler::readChromatogram(int num){
 	chromat->clear();
 
 	if(m_bNoIndex){
-		cout << "Currently only supporting indexed mzML" << endl;
+	  Rprintf("Currently only supporting indexed mzML\n");
+	  //cout << "Currently only supporting indexed mzML" << endl;
 		return false;
 	}
 
@@ -670,7 +671,8 @@ bool mzpSAXMzmlHandler::readHeader(int num){
 	spec->clear();
 
 	if(m_bNoIndex){
-		cout << "Currently only supporting indexed mzML" << endl;
+	  Rprintf("Currently only supporting indexed mzML\n");
+	  //cout << "Currently only supporting indexed mzML" << endl;
 		return false;
 	}
 
@@ -717,7 +719,8 @@ bool mzpSAXMzmlHandler::readSpectrum(int num){
 	spec->clear();
 
 	if(m_bNoIndex){
-		cout << "Currently only supporting indexed mzML" << endl;
+	  Rprintf("Currently only supporting indexed mzML\n");
+	  //cout << "Currently only supporting indexed mzML" << endl;
 		return false;
 	}
 
@@ -817,8 +820,10 @@ void mzpSAXMzmlHandler::decode(vector<double>& d){
       unzippedLen = m_peaksCount*sizeof(uint64_t);
     } else {
       if(!m_bNumpressLinear && !m_bNumpressSlof && !m_bNumpressPic){
-        cout << "Unknown data format to unzip. Stopping file read." << endl;
-        exit(EXIT_FAILURE);
+	Rprintf("Unknown data format to unzip. Stopping file read.\n");
+	// cout << "Unknown data format to unzip. Stopping file read." << endl;
+        //exit(EXIT_FAILURE);
+	return;
       }
 	  //don't know the unzipped size of numpressed data, so assume it to be no larger than unpressed 64-bit data
 	  unzippedLen = m_peaksCount*sizeof(uint64_t);
@@ -846,8 +851,10 @@ void mzpSAXMzmlHandler::decode(vector<double>& d){
         else ms::numpress::MSNumpress::decodePic((unsigned char*)decoded,decodeLen,unpressed);
       }
 	} catch (const char* ch){
-	  cout << "Exception: " << ch << endl;
-	  exit(EXIT_FAILURE);
+	  Rprintf("Exception: %s\n", ch);
+	  // cout << "Exception: " << ch << endl;
+	  //exit(EXIT_FAILURE);
+	  return;
 	}
 
     if(m_bZlib) delete [] unzipped;
@@ -954,7 +961,7 @@ f_off mzpSAXMzmlHandler::readIndexOffset() {
 	}
 
 	if(start==NULL || stop==NULL) {
-		cerr << "No index list offset found. File will not be read." << endl;
+	  Rprintf("No index list offset found. File will not be read.");
 		return 0;
 	}
 
@@ -979,7 +986,7 @@ bool mzpSAXMzmlHandler::load(const char* fileName){
 	} else {
 		m_bNoIndex=false;
 		if(!parseOffset(indexOffset)){
-			cerr << "Cannot parse index. Make sure index offset is correct or rebuild index." << endl;
+		  Rprintf("Cannot parse index. Make sure index offset is correct or rebuild index.\n");
 			return false;
 		}
 		posIndex=-1;

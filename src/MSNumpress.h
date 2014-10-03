@@ -39,6 +39,8 @@ limitations under the License.
 #ifndef _MSNUMPRESS_HPP_
 #define _MSNUMPRESS_HPP_
 
+#include <Rcpp.h> 
+
 #include <cstddef>
 #include <vector>
 

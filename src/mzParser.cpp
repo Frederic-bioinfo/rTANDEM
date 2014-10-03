@@ -228,7 +228,7 @@ int MzParser::checkFileType(char* fname){
 #ifdef MZP_MZ5
     return 5;
 #else
-    cerr << "MZ5 support disabled at compilation. To enable, re-compile source with appropriate flag." << endl;
+    Rprintf("MZ5 support disabled at compilation. To enable, re-compile source with appropriate flag.\n");
     return 0;
 #endif
   }
@@ -236,9 +236,9 @@ int MzParser::checkFileType(char* fname){
 	if(!strcmp(ext,"GZ")) {
 		if(!strcmp(preExt,"MZML")) return 3;
 		if(!strcmp(preExt,"MZXML")) return 4;
-		cerr << "Unknown .gz file. Only .mzML.gz and .mzXML.gz allowed. No file loaded." << endl;
+		Rprintf("Unknown .gz file. Only .mzML.gz and .mzXML.gz allowed. No file loaded.\n");
 		return 0;
 	}
-	cerr << "Unknown file type. No file loaded." << endl;
+	Rprintf("Unknown file type. No file loaded.\n");
 	return 0;
 }

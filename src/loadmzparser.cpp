@@ -94,8 +94,7 @@ void loadmzparser::processSpectrum(int charge){
 		vSpec->push_back(m);
 		m_lLoaded++;
 		if(m_lLoaded == 2000)	{
-			cout << ".";
-			cout.flush();
+		  Rprintf(".\n");
 			m_lLoaded = 0;
 		}
 	}

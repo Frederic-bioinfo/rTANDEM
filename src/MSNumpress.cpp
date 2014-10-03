@@ -29,7 +29,7 @@ namespace numpress {
 namespace MSNumpress {
 
 using std::cout;
-using std::cerr;
+//using std::cerr;   //rTANDEM: cerr are redirected to the R console.
 using std::endl;
 using std::min;
 using std::max;
@@ -507,8 +507,9 @@ int decodeSafe(
                         result[ri++] = latest[2];
                 }
         } catch (...) {
-                cerr << "got some error" << endl;
-                return -1;
+	  Rprintf("Got some error\n");
+	  //  cerr << "got some error" << endl;
+	  return -1;
         }
         
         return ri;
