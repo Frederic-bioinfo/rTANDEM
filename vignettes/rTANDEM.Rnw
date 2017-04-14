@@ -151,7 +151,7 @@ With our results being in R, we can harness the power of other R and bioconducto
 <<Change display, echo=FALSE>>=
 options("width"=70)
 @ 
-<<Using biomaRt>>=
+<<Using biomaRt, eval=FALSE>>=
 library(biomaRt)
 ensembl.mart<- useMart(biomart="ensembl", dataset="scerevisiae_gene_ensembl")
 str(getBM(mart=ensembl.mart, filters="ensembl_peptide_id", values="YFR053C", 
