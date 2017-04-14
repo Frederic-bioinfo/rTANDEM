@@ -158,7 +158,7 @@ str(getBM(mart=ensembl.mart, filters="ensembl_peptide_id", values="YFR053C",
           attributes="description"), 
     strict.width="wrap", nchar.max=500) 
 getBM(mart=ensembl.mart, filters="ensembl_peptide_id", values="YFR053C", 
-      attributes=c("ensembl_peptide_id", "uniprot_swissprot"))
+      attributes=c("ensembl_peptide_id", "uniprotswissprot"))
 getBM(mart=ensembl.mart, filters="ensembl_peptide_id", values="YFR053C", 
       attributes=c("go_id", "name_1006"))
 @
