@@ -1000,10 +1000,10 @@ void SAXResidHandler::endElement(const XML_Char *el)
   char resid;
   if(isElement("Entry", el)){
     if (m_strModType.empty() == true){
-      while (pos = m_strResidues.find(',')>m_strResidues.npos){
+      while ((pos = m_strResidues.find(',')>m_strResidues.npos)){
 	m_strResidues.erase(pos,1);
       }
-      while (pos = m_strResidues.find(' ')>m_strResidues.npos){
+      while ((pos = m_strResidues.find(' ')>m_strResidues.npos)){
 	m_strResidues.erase(pos,1);
       }
       len = m_strResidues.length();
