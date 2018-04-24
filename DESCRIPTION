@@ -1,8 +1,8 @@
 Package: rTANDEM
 Type: Package
 Title: Interfaces the tandem protein identification algorithm in R
-Version: 1.19.0
-Date: 2017-04-13
+Version: 1.19.1
+Date: 2018-04-24
 SystemRequirements: rTANDEM uses expat and pthread libraries. See the
         README file for details.
 Author@R: c(person("Frederic", "Fournier",
