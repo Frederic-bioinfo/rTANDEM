@@ -342,9 +342,9 @@ aa <- function(name, attrs, ...) { #handler function
     env1$ptm.dt.key <- env1$ptm.dt.key + 1000L
   }
   set(env1$ptm.dt, env1$ptm.key, 1L, env1$domain.attrs['id'])
-  set(env1$ptm.dt, env1$ptm.key, 2L, attrs['type'])
-  set(env1$ptm.dt, env1$ptm.key, 3L, attrs['at'])
-  set(env1$ptm.dt, env1$ptm.key, 4L, attrs['modified'])
+  set(env1$ptm.dt, env1$ptm.key, 2L, as.character(attrs['type']))
+  set(env1$ptm.dt, env1$ptm.key, 3L, as.integer(attrs['at']))
+  set(env1$ptm.dt, env1$ptm.key, 4L, as.numeric(attrs['modified']))
 }
 environment(aa) <- env1
 
