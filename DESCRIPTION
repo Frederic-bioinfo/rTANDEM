@@ -1,7 +1,7 @@
 Package: rTANDEM
 Type: Package
 Title: Interfaces the tandem protein identification algorithm in R
-Version: 1.23.0
+Version: 1.23.1
 Date: 2018-04-24
 SystemRequirements: rTANDEM uses expat and pthread libraries. See the
         README file for details.
@@ -14,7 +14,7 @@ Author@R: c(person("Frederic", "Fournier",
 Author: Frederic Fournier <frederic.fournier@crchuq.ulaval.ca>, Charles Joly Beauparlant <charles.joly-beauparlant@crchul.ulaval.ca>, Rene Paradis <rene.paradis@genome.ulaval.ca>, Arnaud Droit <arnaud.droit@crchuq.ulaval.ca>
 Maintainer: Frederic Fournier <frederic.fournier@crchuq.ulaval.ca>
 Description: This package interfaces the tandem protein identification algorithm in R. Identification can be launched in the X!Tandem style, by using as sole parameter the path to a parameter file. But rTANDEM aslo provides extended syntax and functions to streamline launching analyses, as well as function to convert results, parameters and taxonomy to/from R. A related package, shinyTANDEM, provides visualization interface for result objects. 
-biocViews: MassSpectrometry, Proteomics
+biocViews: ImmunoOncology, MassSpectrometry, Proteomics
 License: Artistic-1.0 | file LICENSE
 Imports: methods
 Depends: XML, Rcpp, data.table (>= 1.8.8)
