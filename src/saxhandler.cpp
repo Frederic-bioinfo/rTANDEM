@@ -312,7 +312,7 @@ void SAXSpectraHandler::pushPeaks(bool bM /*= true*/, bool bI /*= true*/)
 			while(*pValue != '\0' && a < m_peaksCount)	{
 				while(*pValue != '\0' && isspace(*pValue))
 					pValue++;
-				if(pValue == '\0')
+				if(*pValue == '\0')
 					break;
 				m_vfM.push_back((float)atof(pValue));
 				while(*pValue != '\0' && !isspace(*pValue))
@@ -324,7 +324,7 @@ void SAXSpectraHandler::pushPeaks(bool bM /*= true*/, bool bI /*= true*/)
 			while(*pValue != '\0' && a < m_peaksCount)	{
 				while(*pValue != '\0' && isspace(*pValue))
 					pValue++;
-				if(pValue == '\0')
+				if(*pValue == '\0')
 					break;
 				m_vfI.push_back((float)atof(pValue));
 				while(*pValue != '\0' && !isspace(*pValue))

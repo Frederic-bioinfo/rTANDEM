@@ -682,7 +682,7 @@ bool loadpkl::get(mspectrum &_m)
 				while(*pValue != '\0' && !isspace(*pValue))	{
 					pValue++;
 				}
-				if(pValue != '\0' && strlen(pValue) > 2)	{
+				if(*pValue != '\0' && strlen(pValue) > 2)	{
 					specCurrent.m_strDescription = pValue;
 				}
 				specCurrent.m_vMI.push_back(miCurrent);
@@ -872,7 +872,7 @@ bool loaddta::get(mspectrum &_m)
 				while(*pValue != '\0' && !isspace(*pValue))	{
 					pValue++;
 				}
-				if(pValue != '\0' && strlen(pValue) > 2)	{
+				if(*pValue != '\0' && strlen(pValue) > 2)	{
 					specCurrent.m_strDescription = pValue;
 				}
 				bFirst = false;
